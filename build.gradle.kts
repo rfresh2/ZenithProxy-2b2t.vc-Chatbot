@@ -1,5 +1,7 @@
 plugins {
     id("zenithproxy.plugin.dev") version "1.0.1-SNAPSHOT"
+    id("org.openapi.generator") version "7.24.0"
+    id("io.freefair.lombok") version "9.5.0"
 }
 
 group = property("maven_group") as String
@@ -35,7 +37,9 @@ repositories {
 
 dependencies {
     zenithProxy("com.zenith:ZenithProxy:$mc-SNAPSHOT")
-
+    compileOnly("com.google.code.findbugs:jsr305:3.0.2")
+    compileOnly("jakarta.annotation:jakarta.annotation-api:1.3.5")
+    shade("org.openapitools:jackson-databind-nullable:0.2.10")
     /** to include dependencies into your plugin jar **/
 //    shade("com.github.ben-manes.caffeine:caffeine:3.2.0")
 }
@@ -60,4 +64,29 @@ tasks {
 //            exclude(dependency(":jspecify:.*"))
 //        }
     }
+    withType(JavaCompile::class) {
+        dependsOn(openApiGenerate)
+    }
+}
+
+sourceSets.main {
+    java.srcDir(project.layout.buildDirectory.dir("generated/sources/openapi/api.2b2t.vc/src/main/java"))
+}
+
+openApiGenerate {
+    inputSpec = file(project.layout.projectDirectory.dir("openapi").file("api.2b2t.vc.openapi.json"))
+    generatorName = "java"
+    outputDir = project.layout.buildDirectory.dir("generated/sources/openapi/api.2b2t.vc")
+    skipValidateSpec = false
+    library = "native"
+    val defaultPackage = "$group.openapi"
+    apiPackage = "$defaultPackage.handler"
+    modelPackage = "$defaultPackage.model"
+    invokerPackage = "$defaultPackage.handler"
+    generateApiTests = false
+    generateModelTests = false
+    configOptions = mapOf(
+        "dateLibrary" to "java8",
+        "useJackson3" to "true"
+    )
 }

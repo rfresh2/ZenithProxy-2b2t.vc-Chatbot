@@ -1,0 +1,1799 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "description": "2b2t Data And Statistics API\n\nDiscord Bot Invite: https://bot.2b2t.vc\n\nQueue Dashboard: https://q.2b2t.vc\n\nSupport & API Keys: https://discord.gg/nJZrSaRKtb\n\nSource Code:\n\nAPI: https://github.com/rfresh2/2b2t.vc-api\n\nDiscord Bot: https://github.com/rfresh2/2b2t.vc-discord\n\nIn-game Bots: https://github.com/rfresh2/ZenithProxy\n",
+    "title": "2b2t.vc API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.2b2t.vc"
+    }
+  ],
+  "paths": {
+    "/bots/month": {
+      "get": {
+        "operationId": "onlinePlayers_1",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BotsMonthResponse"
+                }
+              }
+            },
+            "description": "List of suspected bots over the past 30 days.\n\nCalculated based on number of times a player has been online for at least the max non-prio session time limit.\n\nData is refreshed daily, but the heuristics search over the past 30 days.\n"
+          },
+          "204": {
+            "description": "No data"
+          }
+        },
+        "tags": [
+          "Bots"
+        ]
+      }
+    },
+    "/chats": {
+      "get": {
+        "operationId": "chats",
+        "parameters": [
+          {
+            "description": "Filter only chats that contain this word",
+            "in": "query",
+            "name": "word",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Resolves to current UUID",
+            "in": "query",
+            "name": "playerName",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uuid",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "startDate",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "in": "query",
+            "name": "endDate",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "description": "Must be between 1-100",
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "description": "Response page",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatSearchResponse"
+                }
+              }
+            },
+            "description": "Search for chat messages with optional filters"
+          },
+          "204": {
+            "description": "No data"
+          },
+          "400": {
+            "description": "Bad request.\n\nIf word is provided, it must be between 3 and 50 valid chat characters.\n\nIf uuid or playerName is provided, it must be for a valid and existing account.\n\nEither word or player must be provided.\n\nIf pageSize is provided, it must be between 1 and 100.\n\nIf startDate and endDate are provided, they must be valid dates in ISO 8601 format, example: \"2022-10-31\".\n"
+          }
+        },
+        "tags": [
+          "Chats"
+        ]
+      }
+    },
+    "/chats/window": {
+      "get": {
+        "operationId": "chatWindow",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "startDate",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "in": "query",
+            "name": "endDate",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "description": "Must be between 1-100",
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "description": "Response page",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatWindowResponse"
+                }
+              }
+            },
+            "description": "All 2b2t chats during a window of time, starting from startDate until endDate or pageSize is met.\n\nResults are sorted in ascending order by default.\n\nstartDate is required if sort is ASC, endDate is required if sort is DESC.\n\nstartDate and endDate must be ISO 8601 formatted strings, in this format: yyyy-MM-dd'T'HH:mm:ss.SSSXXX\n\nExample: \"2022-10-31T01:30:00.000\".\n"
+          },
+          "204": {
+            "description": "No chats found in this window."
+          },
+          "400": {
+            "description": "Bad request. startDate must be provided"
+          }
+        },
+        "tags": [
+          "Chats"
+        ]
+      }
+    },
+    "/chats/word-count": {
+      "get": {
+        "operationId": "wordCount",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "word",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WordCount"
+                }
+              }
+            },
+            "description": "Counts the number of times a word has appeared in chat"
+          },
+          "400": {
+            "description": "Bad request. The word must be between 4 and 30 characters."
+          }
+        },
+        "tags": [
+          "Chats"
+        ]
+      }
+    },
+    "/connections": {
+      "get": {
+        "operationId": "connections",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "uuid",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "description": "Resolves to current UUID",
+            "in": "query",
+            "name": "playerName",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "startDate",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "in": "query",
+            "name": "endDate",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "description": "Must be between 1-100",
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "description": "Response page",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionsResponse"
+                }
+              }
+            },
+            "description": "Connection history for given player"
+          },
+          "204": {
+            "description": "No data for player"
+          },
+          "400": {
+            "description": "Bad request. Either uuid or playerName must be provided."
+          }
+        },
+        "tags": [
+          "Connections"
+        ]
+      }
+    },
+    "/connections/window": {
+      "get": {
+        "operationId": "connectionsWindow",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "startDate",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "in": "query",
+            "name": "endDate",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "description": "Must be between 1-100",
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "description": "Response page",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionsWindowResponse"
+                }
+              }
+            },
+            "description": "All 2b2t connections during a window of time, starting from startDate (required) until endDate or pageSize is met\n\nstartDate and endDate must be ISO 8601 formatted strings, in this format: yyyy-MM-dd'T'HH:mm:ss.SSSXXX\n\nExample: \"2022-10-31T01:30:00.000\".\n"
+          },
+          "204": {
+            "description": "No connections found in this window."
+          },
+          "400": {
+            "description": "Bad request. startDate must be provided"
+          }
+        },
+        "tags": [
+          "Connections"
+        ]
+      }
+    },
+    "/deaths": {
+      "get": {
+        "operationId": "deaths",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "uuid",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "description": "Resolves to current UUID",
+            "in": "query",
+            "name": "playerName",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "startDate",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "in": "query",
+            "name": "endDate",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "description": "Must be between 1-100",
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "description": "Response page",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeathsResponse"
+                }
+              }
+            },
+            "description": "Death history for given player"
+          },
+          "204": {
+            "description": "No data for player"
+          },
+          "400": {
+            "description": "Bad request. Either uuid or playerName must be provided."
+          }
+        },
+        "tags": [
+          "Deaths"
+        ]
+      }
+    },
+    "/deaths/top/month": {
+      "get": {
+        "operationId": "deathsTopMonth",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayerDeathOrKillCountResponse"
+                }
+              }
+            },
+            "description": "Top deaths for the month"
+          },
+          "204": {
+            "description": "No data for the month"
+          }
+        },
+        "tags": [
+          "Deaths"
+        ]
+      }
+    },
+    "/deaths/window": {
+      "get": {
+        "operationId": "deathsWindow",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "startDate",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "in": "query",
+            "name": "endDate",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "description": "Must be between 1-100",
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "description": "Response page",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeathsWindowResponse"
+                }
+              }
+            },
+            "description": "All 2b2t deaths during a window of time, starting from startDate (required) until endDate or pageSize is met\n\nstartDate and endDate must be ISO 8601 formatted strings, in this format: yyyy-MM-dd'T'HH:mm:ss.SSSXXX\n\nExample: \"2022-10-31T01:30:00.000\".\n"
+          },
+          "204": {
+            "description": "No deaths found in this window."
+          },
+          "400": {
+            "description": "Bad request. startDate must be provided"
+          }
+        },
+        "tags": [
+          "Deaths"
+        ]
+      }
+    },
+    "/dump/player": {
+      "get": {
+        "operationId": "getPlayerDataDump",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "uuid",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "description": "Resolves to current UUID",
+            "in": "query",
+            "name": "playerName",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/csv": {}
+            },
+            "description": "Data dump for given player"
+          },
+          "204": {
+            "description": "No data for player"
+          },
+          "400": {
+            "description": "Bad request. Either uuid or playerName must be provided."
+          }
+        },
+        "tags": [
+          "Data Dump"
+        ]
+      }
+    },
+    "/feed/chats": {
+      "get": {
+        "operationId": "chatFeedSSE",
+        "responses": {
+          "200": {
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatsFeedRecord",
+                  "contentMediaType": "application/json"
+                }
+              }
+            },
+            "description": "Server Sent Events (SSE) stream of live 2b2t chat."
+          }
+        },
+        "tags": [
+          "Feed"
+        ]
+      }
+    },
+    "/feed/connections": {
+      "get": {
+        "operationId": "connectionsFeedSSE",
+        "responses": {
+          "200": {
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionsFeedRecord",
+                  "contentMediaType": "application/json"
+                }
+              }
+            },
+            "description": "Server Sent Events (SSE) stream of live 2b2t connections."
+          }
+        },
+        "tags": [
+          "Feed"
+        ]
+      }
+    },
+    "/feed/deaths": {
+      "get": {
+        "operationId": "deathsFeedSSE",
+        "responses": {
+          "200": {
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeathsFeedRecord",
+                  "contentMediaType": "application/json"
+                }
+              }
+            },
+            "description": "Server Sent Events (SSE) stream of live 2b2t death messages."
+          }
+        },
+        "tags": [
+          "Feed"
+        ]
+      }
+    },
+    "/kills": {
+      "get": {
+        "operationId": "kills",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "uuid",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "description": "Resolves to current UUID",
+            "in": "query",
+            "name": "playerName",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "startDate",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "in": "query",
+            "name": "endDate",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "description": "Must be between 1-100",
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "description": "Response page",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KillsResponse"
+                }
+              }
+            },
+            "description": "Kill history for given player"
+          },
+          "204": {
+            "description": "No data for player"
+          },
+          "400": {
+            "description": "Bad request. Either uuid or playerName must be provided."
+          }
+        },
+        "tags": [
+          "Deaths"
+        ]
+      }
+    },
+    "/kills/top/month": {
+      "get": {
+        "operationId": "killsTopMonth",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayerDeathOrKillCountResponse"
+                }
+              }
+            },
+            "description": "Top kills for the month"
+          },
+          "204": {
+            "description": "No data for the month"
+          }
+        },
+        "tags": [
+          "Deaths"
+        ]
+      }
+    },
+    "/limits/session-time-limit": {
+      "get": {
+        "operationId": "getNonPrioKickTimeLimit",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionTimeLimitResponse"
+                }
+              }
+            },
+            "description": "Return the current 2b2t game session time limit for non-priority players.\n\nWhen this limit is reached, the player will be kicked from the server.\n"
+          }
+        },
+        "tags": [
+          "Limits"
+        ]
+      }
+    },
+    "/players/priority": {
+      "get": {
+        "operationId": "priorityPlayers",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriorityPlayersResponse"
+                }
+              }
+            },
+            "description": "Gets all players who (probably) have priority queue.\n\nThis is calculated based on the number of times a player has:\n1. Disconnected and then connected within a brief time window.\n2. Session time above the non-prio limit.\n\nData is refreshed daily, but the heuristics search over the past 30 days.\n"
+          },
+          "204": {
+            "description": "No data"
+          }
+        },
+        "tags": [
+          "PriorityPlayers"
+        ]
+      }
+    },
+    "/playtime": {
+      "get": {
+        "operationId": "playtime",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "uuid",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "description": "Resolves to current UUID",
+            "in": "query",
+            "name": "playerName",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaytimeResponse"
+                }
+              }
+            },
+            "description": "Playtime for given player"
+          },
+          "204": {
+            "description": "No data for player"
+          },
+          "400": {
+            "description": "Bad request. Either uuid or playerName must be provided."
+          }
+        },
+        "tags": [
+          "Playtime"
+        ]
+      }
+    },
+    "/playtime/top": {
+      "get": {
+        "operationId": "playtimeTopAllTime",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaytimeAllTimeResponse"
+                }
+              }
+            },
+            "description": "Top playtime all time"
+          },
+          "204": {
+            "description": "No data"
+          }
+        },
+        "tags": [
+          "Playtime"
+        ]
+      }
+    },
+    "/playtime/top/month": {
+      "get": {
+        "operationId": "playtimeTopMonth",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaytimeMonthResponse"
+                }
+              }
+            },
+            "description": "Top playtime for the month"
+          },
+          "204": {
+            "description": "No data"
+          }
+        },
+        "tags": [
+          "Playtime"
+        ]
+      }
+    },
+    "/queue": {
+      "get": {
+        "operationId": "queue",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueData"
+                }
+              }
+            },
+            "description": "Current queue lengths"
+          },
+          "204": {
+            "description": "No data"
+          }
+        },
+        "tags": [
+          "Queue"
+        ]
+      }
+    },
+    "/queue/eta-equation": {
+      "get": {
+        "operationId": "etaEquation",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueEtaEquation"
+                }
+              }
+            },
+            "description": "ETA seconds = factor * (queuePosition ^ pow)"
+          }
+        },
+        "tags": [
+          "Queue"
+        ]
+      }
+    },
+    "/queue/month": {
+      "get": {
+        "operationId": "queueHistory",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueLengthHistory"
+                }
+              }
+            },
+            "description": "Queue length history for the last month"
+          }
+        },
+        "tags": [
+          "Queue"
+        ]
+      }
+    },
+    "/seen": {
+      "get": {
+        "operationId": "seen",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "uuid",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "description": "Resolves to current UUID",
+            "in": "query",
+            "name": "playerName",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeenResponse"
+                }
+              }
+            },
+            "description": "First and last time a player was seen on 2b2t"
+          },
+          "204": {
+            "description": "No data for player"
+          },
+          "400": {
+            "description": "Bad request. Either uuid or playerName must be provided."
+          }
+        },
+        "tags": [
+          "Seen"
+        ]
+      }
+    },
+    "/stats/player": {
+      "get": {
+        "operationId": "playerStats",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "uuid",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "description": "Resolves to current UUID",
+            "in": "query",
+            "name": "playerName",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayerStats"
+                }
+              }
+            },
+            "description": "Player statistics"
+          },
+          "204": {
+            "description": "No data for player"
+          },
+          "400": {
+            "description": "Bad request. Either uuid or playerName must be provided."
+          }
+        },
+        "tags": [
+          "Stats"
+        ]
+      }
+    },
+    "/tablist": {
+      "get": {
+        "operationId": "onlinePlayers",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TablistResponse"
+                }
+              }
+            },
+            "description": "List of online players"
+          },
+          "204": {
+            "description": "No data"
+          }
+        },
+        "tags": [
+          "TabList"
+        ]
+      }
+    },
+    "/tablist/info": {
+      "get": {
+        "operationId": "onlinePlayersInfo",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TablistInfoResponse"
+                }
+              }
+            },
+            "description": "List of online players with additional info about their prio and bot status"
+          },
+          "204": {
+            "description": "No data"
+          }
+        },
+        "tags": [
+          "TabList"
+        ]
+      }
+    },
+    "/time": {
+      "get": {
+        "operationId": "getWorldTime",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimeResponse"
+                }
+              }
+            },
+            "description": "Returns the 2b2t world time in ticks (0 - 24000).\n\nTo determine the real-time 2b2t world time, interpolate between lastUpdated and the current real world time.\n\nMC and real world time conversion help: https://minecraft.wiki/w/Daylight_cycle#Conversions\n1 minecraft tick = 50 ms real world time\n\nDaytime starts at 6:00 (0 ticks) and night begins at 18:00 (12000 ticks)\n"
+          },
+          "204": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimeResponse"
+                }
+              }
+            },
+            "description": "No world time data available"
+          }
+        },
+        "tags": [
+          "Time"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BotData": {
+        "type": "object",
+        "properties": {
+          "playerName": {
+            "type": "string"
+          },
+          "uuid": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "BotsMonthResponse": {
+        "type": "object",
+        "properties": {
+          "players": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BotData"
+            }
+          }
+        }
+      },
+      "ChatSearchResponse": {
+        "type": "object",
+        "properties": {
+          "chats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlayerChat"
+            }
+          },
+          "pageCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ChatWindowResponse": {
+        "type": "object",
+        "properties": {
+          "chats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlayerChat"
+            }
+          }
+        }
+      },
+      "ChatsFeedRecord": {
+        "type": "object",
+        "properties": {
+          "chat": {
+            "type": "string"
+          },
+          "component": {
+            "type": "string"
+          },
+          "playerName": {
+            "type": "string"
+          },
+          "playerUuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "time": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Connection": {
+        "type": "object",
+        "properties": {
+          "connection": {
+            "type": "string",
+            "enum": [
+              "JOIN",
+              "LEAVE"
+            ]
+          },
+          "time": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ConnectionsFeedRecord": {
+        "type": "object",
+        "properties": {
+          "connection": {
+            "type": "string",
+            "enum": [
+              "JOIN",
+              "LEAVE"
+            ]
+          },
+          "playerName": {
+            "type": "string"
+          },
+          "playerUuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "time": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ConnectionsResponse": {
+        "type": "object",
+        "properties": {
+          "connections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Connection"
+            }
+          },
+          "pageCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ConnectionsWindowResponse": {
+        "type": "object",
+        "properties": {
+          "connections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlayerConnection"
+            }
+          }
+        }
+      },
+      "Death": {
+        "type": "object",
+        "properties": {
+          "deathMessage": {
+            "type": "string"
+          },
+          "killerMob": {
+            "type": "string"
+          },
+          "killerPlayerName": {
+            "type": "string"
+          },
+          "killerPlayerUuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "victimPlayerName": {
+            "type": "string"
+          },
+          "victimPlayerUuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "weaponName": {
+            "type": "string"
+          }
+        }
+      },
+      "DeathsFeedRecord": {
+        "type": "object",
+        "properties": {
+          "component": {
+            "type": "string"
+          },
+          "deathMessage": {
+            "type": "string"
+          },
+          "killerPlayerName": {
+            "type": "string"
+          },
+          "killerPlayerUuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "victimPlayerName": {
+            "type": "string"
+          },
+          "victimPlayerUuid": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "DeathsResponse": {
+        "type": "object",
+        "properties": {
+          "deaths": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Death"
+            }
+          },
+          "pageCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DeathsWindowResponse": {
+        "type": "object",
+        "properties": {
+          "deaths": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Death"
+            }
+          }
+        }
+      },
+      "KillsResponse": {
+        "type": "object",
+        "properties": {
+          "kills": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Death"
+            }
+          },
+          "pageCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PlayerChat": {
+        "type": "object",
+        "properties": {
+          "chat": {
+            "type": "string"
+          },
+          "playerName": {
+            "type": "string"
+          },
+          "time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "uuid": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "PlayerConnection": {
+        "type": "object",
+        "properties": {
+          "connection": {
+            "type": "string",
+            "enum": [
+              "JOIN",
+              "LEAVE"
+            ]
+          },
+          "playerName": {
+            "type": "string"
+          },
+          "time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "uuid": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "PlayerDeathOrKillCount": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "playerName": {
+            "type": "string"
+          },
+          "uuid": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "PlayerDeathOrKillCountResponse": {
+        "type": "object",
+        "properties": {
+          "players": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlayerDeathOrKillCount"
+            }
+          }
+        }
+      },
+      "PlayerPlaytimeDaysData": {
+        "type": "object",
+        "properties": {
+          "playerName": {
+            "type": "string"
+          },
+          "playtimeDays": {
+            "type": "number",
+            "format": "double"
+          },
+          "uuid": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "PlayerPlaytimeSecondsData": {
+        "type": "object",
+        "properties": {
+          "playerName": {
+            "type": "string"
+          },
+          "playtimeSeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "uuid": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "PlayerStats": {
+        "type": "object",
+        "properties": {
+          "chatsCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deathCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "firstSeen": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "joinCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "killCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastSeen": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "leaveCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "playtimeSeconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "playtimeSecondsMonth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "prio": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PlaytimeAllTimeResponse": {
+        "type": "object",
+        "properties": {
+          "players": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlayerPlaytimeSecondsData"
+            }
+          }
+        }
+      },
+      "PlaytimeMonthResponse": {
+        "type": "object",
+        "properties": {
+          "players": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlayerPlaytimeDaysData"
+            }
+          }
+        }
+      },
+      "PlaytimeResponse": {
+        "type": "object",
+        "properties": {
+          "playtimeSeconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "uuid": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "PriorityPlayer": {
+        "type": "object",
+        "properties": {
+          "playerName": {
+            "type": "string"
+          },
+          "uuid": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "PriorityPlayersResponse": {
+        "type": "object",
+        "properties": {
+          "players": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PriorityPlayer"
+            }
+          }
+        }
+      },
+      "QueueData": {
+        "type": "object",
+        "properties": {
+          "prio": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "regular": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "time": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "QueueEtaEquation": {
+        "type": "object",
+        "properties": {
+          "factor": {
+            "type": "number",
+            "format": "double"
+          },
+          "pow": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "QueueLengthHistory": {
+        "type": "object",
+        "properties": {
+          "queueData": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QueueData"
+            }
+          }
+        }
+      },
+      "SeenResponse": {
+        "type": "object",
+        "properties": {
+          "firstSeen": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastSeen": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SessionTimeLimitResponse": {
+        "type": "object",
+        "properties": {
+          "hours": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "TablistEntry": {
+        "type": "object",
+        "properties": {
+          "playerName": {
+            "type": "string"
+          },
+          "uuid": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "TablistInfoEntry": {
+        "type": "object",
+        "properties": {
+          "bot": {
+            "type": "boolean"
+          },
+          "playerName": {
+            "type": "string"
+          },
+          "prio": {
+            "type": "boolean"
+          },
+          "uuid": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "TablistInfoResponse": {
+        "type": "object",
+        "properties": {
+          "botCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "header": {
+            "type": "string"
+          },
+          "nonPrioCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "players": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TablistInfoEntry"
+            }
+          },
+          "prioCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "TablistResponse": {
+        "type": "object",
+        "properties": {
+          "header": {
+            "type": "string"
+          },
+          "players": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TablistEntry"
+            }
+          }
+        }
+      },
+      "TimeResponse": {
+        "type": "object",
+        "properties": {
+          "lastUpdated": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "worldTime": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "WordCount": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      }
+    }
+  }
+}
