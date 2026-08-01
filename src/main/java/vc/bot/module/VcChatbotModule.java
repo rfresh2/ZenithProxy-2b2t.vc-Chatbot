@@ -43,11 +43,11 @@ public class VcChatbotModule extends Module {
         var input = event.message().trim();
         if (!PLUGIN_CONFIG.prefix.contains(">")) {
             // chop off any greentext prefix
-            while (input.startsWith(">") && input.contains(PLUGIN_CONFIG.prefix)) {
+            while (input.startsWith(">") && input.toLowerCase().contains(PLUGIN_CONFIG.prefix)) {
                 input = input.substring(1).trim();
             }
         }
-        if (!input.startsWith(PLUGIN_CONFIG.prefix)) {
+        if (!input.toLowerCase().startsWith(PLUGIN_CONFIG.prefix)) {
             return;
         }
         var msg = input.substring(PLUGIN_CONFIG.prefix.length());
