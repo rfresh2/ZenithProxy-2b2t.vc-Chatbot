@@ -18,15 +18,26 @@ public class PrioPlayersCmd extends Cmd {
 
     @Override
     public @Nullable String handle(final PlayerListEntry sender, final List<String> args) throws ApiException {
-        var response = priorityPlayersApi.priorityPlayers();
-        if (response == null || response.getPlayers() == null) {
+        try {
+            var response = priorityPlayersApi.priorityPlayers();
+            if (response == null) {
+                return null;
+            }
+            if (response.getPlayers() == null) {
+                return "No data found";
+            }
+            var count = response.getPlayers().size();
+            var moneyPerMonth = count * 20;
+            return "there are currently %s prio players, making 2b2t $%s this month".formatted(
+                count,
+                moneyPerMonth
+            );
+        } catch (ApiException e) {
+            if (e.getCode() == 204) {
+                return "No data found";
+            }
+            error("API error", e);
             return null;
         }
-        var count = response.getPlayers().size();
-        var moneyPerMonth = count * 20;
-        return "there are currently %s prio players, making 2b2t $%s this month".formatted(
-            count,
-            moneyPerMonth
-        );
     }
 }

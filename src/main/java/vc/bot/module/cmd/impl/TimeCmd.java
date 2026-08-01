@@ -29,16 +29,27 @@ public class TimeCmd extends Cmd {
         // Daytime starts at 6:00 (0 ticks) and night begins at 18:00 (12000 ticks)
         long curTickTime;
         if (World.getCurrentDimension() != DimensionRegistry.OVERWORLD.get() || worldTimeData == null) {
-            var response = timeApi.getWorldTime();
-            if (response == null || response.getWorldTime() == null) {
+            try {
+                var response = timeApi.getWorldTime();
+                if (response == null) {
+                    return null;
+                }
+                if (response.getWorldTime() == null) {
+                    return "No data found";
+                }
+
+                var worldTime = response.getWorldTime();
+                var updatedTime = response.getLastUpdated();
+                var timeLag = Duration.between(updatedTime, OffsetDateTime.now());
+                var ticksLag = timeLag.toMillis() / 50L;
+                curTickTime = (worldTime + ticksLag) % 24000L;
+            } catch (ApiException e) {
+                if (e.getCode() == 204) {
+                    return "No data found";
+                }
+                error("API error", e);
                 return null;
             }
-
-            var worldTime = response.getWorldTime();
-            var updatedTime = response.getLastUpdated();
-            var timeLag = Duration.between(updatedTime, OffsetDateTime.now());
-            var ticksLag = timeLag.toMillis() / 50L;
-            curTickTime = (worldTime + ticksLag) % 24000L;
         } else {
             var worldTime = worldTimeData.isTickDayTime() ? worldTimeData.getDayTime() : -worldTimeData.getDayTime();
             curTickTime = worldTime % 24000L;

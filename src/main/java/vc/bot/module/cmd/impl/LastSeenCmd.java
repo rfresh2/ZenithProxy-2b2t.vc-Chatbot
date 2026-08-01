@@ -18,14 +18,28 @@ public class LastSeenCmd extends Cmd {
 
     @Override
     public @Nullable String handle(final PlayerListEntry sender, final List<String> args) throws ApiException {
-        var targetName = targetName(sender, args);
-        var response = seenApi.seen(null, targetName);
-        if (response == null || response.getLastSeen() == null) {
+        var targetProfile = target(sender, args);
+        if (targetProfile.isEmpty()) {
             return null;
         }
-        return "%s was last seen on %s".formatted(
-            targetName,
-            defaultDateFormatter().format(response.getLastSeen())
-        );
+        try {
+            var response = seenApi.seen(targetProfile.get().uuid(), targetProfile.get().name());
+            if (response == null) {
+                return null;
+            }
+            if (response.getLastSeen() == null) {
+                return "No data found for %s".formatted(targetProfile.get().name());
+            }
+            return "%s was last seen on %s".formatted(
+                targetProfile.get().name(),
+                defaultDateFormatter().format(response.getLastSeen())
+            );
+        } catch (ApiException e) {
+            if (e.getCode() == 204) {
+                return "No data found for %s".formatted(targetProfile.get().name());
+            }
+            error("API error", e);
+            return null;
+        }
     }
 }

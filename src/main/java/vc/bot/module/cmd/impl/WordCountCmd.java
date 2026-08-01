@@ -29,13 +29,24 @@ public class WordCountCmd extends Cmd {
         if (word.length() < 3 || word.length() > 16) {
             return "Invalid word length, 4 <= length <= 16";
         }
-        var response = chatsApi.wordCount(word);
-        if (response == null || response.getCount() == null) {
+        try {
+            var response = chatsApi.wordCount(word);
+            if (response == null) {
+                return null;
+            }
+            if (response.getCount() == null) {
+                return "No data found";
+            }
+            return "the word '%s' has been seen %s times!".formatted(
+                word,
+                response.getCount()
+            );
+        } catch (ApiException e) {
+            if (e.getCode() == 204) {
+                return "No data found";
+            }
+            error("API error", e);
             return null;
         }
-        return "the word '%s' has been seen %s times!".formatted(
-            word,
-            response.getCount()
-        );
     }
 }

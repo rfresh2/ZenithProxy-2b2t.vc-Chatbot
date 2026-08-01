@@ -19,15 +19,29 @@ public class FirstWordsCmd extends Cmd {
 
     @Override
     public @Nullable String handle(final PlayerListEntry sender, final List<String> args) throws ApiException {
-        var targetName = targetName(sender, args);
-        var response = chatsApi.chats(null, targetName, null, null, null, "asc", 1, 0);
-        if (response == null || response.getChats() == null || response.getChats().isEmpty()) {
+        var targetProfile = target(sender, args);
+        if (targetProfile.isEmpty()) {
             return null;
         }
-        return "[%s] <%s> %s".formatted(
-            defaultDateFormatter().format(response.getChats().getFirst().getTime()),
-            targetName,
-            response.getChats().getFirst().getChat()
-        );
+        try {
+            var response = chatsApi.chats(null, targetProfile.get().name(), targetProfile.get().uuid(), null, null, "asc", 1, 0);
+            if (response == null) {
+                return null;
+            }
+            if (response.getChats().isEmpty()) {
+                return "No data found for %s".formatted(targetProfile.get().name());
+            }
+            return "[%s] <%s> %s".formatted(
+                defaultDateFormatter().format(response.getChats().getFirst().getTime()),
+                targetProfile.get().name(),
+                response.getChats().getFirst().getChat()
+            );
+        } catch (ApiException e) {
+            if (e.getCode() == 204) {
+                return "No data found for %s".formatted(targetProfile.get().name());
+            }
+            error("API error", e);
+            return null;
+        }
     }
 }

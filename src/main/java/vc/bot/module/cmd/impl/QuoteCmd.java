@@ -20,25 +20,42 @@ public class QuoteCmd extends Cmd {
 
     @Override
     public @Nullable String handle(final PlayerListEntry sender, final List<String> args) throws ApiException {
-        var targetName = targetName(sender, args);
-        var response = chatsApi.chats(null, targetName, null, null, null, "desc", 100, null);
-        if (response == null || response.getChats() == null) {
+        var targetProfile = target(sender, args);
+        if (targetProfile.isEmpty()) {
             return null;
         }
-        if (response.getTotal() == 0) {
-            return "%s has not chatted".formatted(targetName);
-        }
-        var chat = response.getChats().get(ThreadLocalRandom.current().nextInt(0, response.getChats().size()));
-        if (response.getPageCount() > 1) {
-            var randomPage = ThreadLocalRandom.current().nextInt(1, response.getPageCount()+1);
-            var response2 = chatsApi.chats(null, targetName, null, null, null, "desc", 100, randomPage);
-            if (response2 != null && response2.getChats() != null && !response2.getChats().isEmpty()) {
-                chat = response2.getChats().get(ThreadLocalRandom.current().nextInt(0, response2.getChats().size()));
+        try {
+            var response = chatsApi.chats(null, targetProfile.get().name(), targetProfile.get().uuid(), null, null, "desc", 100, null);
+            if (response == null) {
+                return null;
             }
+            if (response.getChats().isEmpty()) {
+                return "No data found for %s".formatted(targetProfile.get().name());
+            }
+            var chat = response.getChats().get(ThreadLocalRandom.current().nextInt(0, response.getChats().size()));
+            if (response.getPageCount() > 1) {
+                var randomPage = ThreadLocalRandom.current().nextInt(1, response.getPageCount() + 1);
+                try {
+                    var response2 = chatsApi.chats(null, targetProfile.get().name(), targetProfile.get().uuid(), null, null, "desc", 100, randomPage);
+                    if (response2 != null && !response2.getChats().isEmpty()) {
+                        chat = response2.getChats().get(ThreadLocalRandom.current().nextInt(0, response2.getChats().size()));
+                    }
+                } catch (ApiException e) {
+                    if (e.getCode() != 204) {
+                        error("API error", e);
+                    }
+                }
+            }
+            return "[%s] <%s> %s".formatted(
+                defaultDateFormatter().format(chat.getTime()),
+                targetProfile.get().name(),
+                chat.getChat());
+        } catch (ApiException e) {
+            if (e.getCode() == 204) {
+                return "No data found for %s".formatted(targetProfile.get().name());
+            }
+            error("API error", e);
+            return null;
         }
-        return "[%s] <%s> %s".formatted(
-            defaultDateFormatter().format(chat.getTime()),
-            targetName,
-            chat.getChat());
     }
 }

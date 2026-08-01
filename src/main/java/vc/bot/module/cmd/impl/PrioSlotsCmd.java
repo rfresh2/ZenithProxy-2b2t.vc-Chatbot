@@ -18,13 +18,21 @@ public class PrioSlotsCmd extends Cmd {
 
     @Override
     public @Nullable String handle(final PlayerListEntry sender, final List<String> args) throws ApiException {
-        var response = tabListApi.onlinePlayersInfo();
-        if (response == null) {
+        try {
+            var response = tabListApi.onlinePlayersInfo();
+            if (response == null) {
+                return null;
+            }
+            return "Non-prio: %s - Prio: %s".formatted(
+                response.getNonPrioCount(),
+                response.getPrioCount()
+            );
+        } catch (ApiException e) {
+            if (e.getCode() == 204) {
+                return "No data found";
+            }
+            error("API error", e);
             return null;
         }
-        return "Non-prio: %s - Prio: %s".formatted(
-            response.getNonPrioCount(),
-            response.getPrioCount()
-        );
     }
 }

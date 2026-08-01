@@ -21,21 +21,32 @@ public class NoLifeCmd extends Cmd {
 
     @Override
     public @Nullable String handle(final PlayerListEntry sender, final List<String> args) throws ApiException {
-        var targetName = targetName(sender, args);
-        var response = statsApi.playerStats(null, targetName);
-        if (response == null) {
+        var targetProfile = target(sender, args);
+        if (targetProfile.isEmpty()) {
             return null;
         }
-        var firstSeen = response.getFirstSeen();
-        var ptSeconds = response.getPlaytimeSeconds();
-        long secondsSinceFirstSeen = Duration.between(firstSeen, OffsetDateTime.now()).toSeconds();
-        double proportionOnline = ptSeconds / (double) secondsSinceFirstSeen;
-        // todo: i think this is wrong
-        Duration durationPerDay = Duration.ofSeconds((long) (Duration.ofDays(1).toSeconds() * proportionOnline));
-        return "%s has wasted %.2f%% of their life since joining! Avg per day: %s".formatted(
-            targetName,
-            proportionOnline * 100.0,
-            MathHelper.formatDuration(durationPerDay)
-        );
+        try {
+            var response = statsApi.playerStats(targetProfile.get().uuid(), targetProfile.get().name());
+            if (response == null) {
+                return null;
+            }
+            var firstSeen = response.getFirstSeen();
+            var ptSeconds = response.getPlaytimeSeconds();
+            long secondsSinceFirstSeen = Duration.between(firstSeen, OffsetDateTime.now()).toSeconds();
+            double proportionOnline = ptSeconds / (double) secondsSinceFirstSeen;
+            // todo: i think this is wrong
+            Duration durationPerDay = Duration.ofSeconds((long) (Duration.ofDays(1).toSeconds() * proportionOnline));
+            return "%s has wasted %.2f%% of their life since joining! Avg per day: %s".formatted(
+                targetProfile.get().name(),
+                proportionOnline * 100.0,
+                MathHelper.formatDuration(durationPerDay)
+            );
+        } catch (ApiException e) {
+            if (e.getCode() == 204) {
+                return "No data found for %s".formatted(targetProfile.get().name());
+            }
+            error("API error", e);
+            return null;
+        }
     }
 }

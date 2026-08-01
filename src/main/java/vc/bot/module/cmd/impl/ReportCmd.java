@@ -15,7 +15,10 @@ public class ReportCmd extends Cmd {
 
     @Override
     public @Nullable String handle(final PlayerListEntry sender, final List<String> args) throws ApiException {
-        var targetName = targetName(sender, args);
-        return "%s has been reported to the admins!".formatted(targetName);
+        var targetProfile = target(sender, args);
+        if (targetProfile.isEmpty()) {
+            return null;
+        }
+        return "%s has been reported to the admins!".formatted(targetProfile.get().name());
     }
 }

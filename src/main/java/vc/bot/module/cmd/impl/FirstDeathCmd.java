@@ -18,14 +18,28 @@ public class FirstDeathCmd extends Cmd {
 
     @Override
     public @Nullable String handle(final PlayerListEntry sender, final List<String> args) throws ApiException {
-        var targetName = targetName(sender, args);
-        var response = deathsApi.deaths(null, targetName, null, null, "asc", 1, null);
-        if (response == null || response.getDeaths() == null || response.getDeaths().isEmpty()) {
+        var targetProfile = target(sender, args);
+        if (targetProfile.isEmpty()) {
             return null;
         }
-        return "[%s] %s".formatted(
-            defaultDateFormatter().format(response.getDeaths().getFirst().getTime()),
-            response.getDeaths().getFirst().getDeathMessage()
-        );
+        try {
+            var response = deathsApi.deaths(targetProfile.get().uuid(), targetProfile.get().name(), null, null, "asc", 1, null);
+            if (response == null) {
+                return null;
+            }
+            if (response.getDeaths().isEmpty()) {
+                return "No data found for %s".formatted(targetProfile.get().name());
+            }
+            return "[%s] %s".formatted(
+                defaultDateFormatter().format(response.getDeaths().getFirst().getTime()),
+                response.getDeaths().getFirst().getDeathMessage()
+            );
+        } catch (ApiException e) {
+            if (e.getCode() == 204) {
+                return "No data found for %s".formatted(targetProfile.get().name());
+            }
+            error("API error", e);
+            return null;
+        }
     }
 }
