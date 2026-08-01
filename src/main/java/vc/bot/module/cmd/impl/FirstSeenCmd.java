@@ -1,28 +1,24 @@
 package vc.bot.module.cmd.impl;
 
-import lombok.SneakyThrows;
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.jspecify.annotations.Nullable;
 import vc.bot.module.cmd.Cmd;
+import vc.bot.openapi.handler.ApiException;
 import vc.bot.openapi.handler.SeenApi;
 
 import java.util.List;
 
-public class JoinDateCmd extends Cmd {
+public class FirstSeenCmd extends Cmd {
     private final SeenApi seenApi = new SeenApi(apiClient());
 
     @Override
     public List<String> cmdAliases() {
-        return List.of("joindate", "join", "jd");
+        return List.of("joindate", "join", "jd", "firstseen");
     }
 
-    @SneakyThrows
     @Override
-    public @Nullable String handle(final PlayerListEntry sender, final List<String> args) {
-        var targetName = sender.getName();
-        if (!args.isEmpty()) {
-            targetName = args.getFirst();
-        }
+    public @Nullable String handle(final PlayerListEntry sender, final List<String> args) throws ApiException {
+        var targetName = targetName(sender, args);
         var response = seenApi.seen(null, targetName);
         var firstSeen = response.getFirstSeen();
         if (firstSeen == null) {
@@ -30,6 +26,6 @@ public class JoinDateCmd extends Cmd {
         }
         var dateFmt = defaultDateFormatter()
             .format(firstSeen);
-        return "%s was first seen at %s".formatted(sender.getName(), dateFmt);
+        return "%s was first seen on %s".formatted(sender.getName(), dateFmt);
     }
 }

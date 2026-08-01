@@ -1,9 +1,11 @@
 package vc.bot.module.cmd;
 
+import com.zenith.util.ChatUtil;
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.jspecify.annotations.Nullable;
 import vc.bot.BuildConstants;
 import vc.bot.openapi.handler.ApiClient;
+import vc.bot.openapi.handler.ApiException;
 
 import java.net.http.HttpClient;
 import java.time.Duration;
@@ -16,7 +18,7 @@ import static vc.bot.VcBotPlugin.PLUGIN_CONFIG;
 
 public abstract class Cmd {
     public abstract List<String> cmdAliases();
-    public abstract @Nullable String handle(PlayerListEntry sender, List<String> args);
+    public abstract @Nullable String handle(PlayerListEntry sender, List<String> args) throws ApiException;
 
     private static final DateTimeFormatter defaultDateFormatter = new DateTimeFormatterBuilder()
         .appendPattern("yyyy-MM-dd HH:mm:ss")
@@ -40,5 +42,16 @@ public abstract class Cmd {
         });
     public ApiClient apiClient() {
         return defaultApiClient;
+    }
+
+    public String targetName(PlayerListEntry sender, List<String> args) {
+        var targetName = sender.getName();
+        if (!args.isEmpty()) {
+            targetName = args.getFirst();
+        }
+        if (!ChatUtil.isValidPlayerName(targetName)) {
+            throw new IllegalArgumentException("Invalid target name: " + targetName);
+        }
+        return targetName;
     }
 }

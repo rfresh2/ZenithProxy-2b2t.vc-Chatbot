@@ -1,6 +1,6 @@
 package vc.bot.module.cmd;
 
-import vc.bot.module.cmd.impl.JoinDateCmd;
+import vc.bot.module.cmd.impl.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -9,6 +9,26 @@ import java.util.Map;
 public class CmdRegistry {
     public static final CmdRegistry INSTANCE = new CmdRegistry();
 
+    private final List<Cmd> cmds = List.of(
+        new CoordsCmd(),
+        new FirstDeathCmd(),
+        new FirstKillCmd(),
+        new FirstSeenCmd(),
+        new FirstWordsCmd(),
+        new HelpCmd(),
+        new KillDeathCmd(),
+        new LastSeenCmd(),
+        new NoLifeCmd(),
+        new PlaytimeCmd(),
+        new PrioPlayersCmd(),
+        new PrioSlotsCmd(),
+        new QueueCmd(),
+        new QuoteCmd(),
+        new ReportCmd(),
+        new TimeCmd(),
+        new TpCmd(),
+        new WordCountCmd()
+    );
     private final Map<String, Cmd> cmdMap;
 
     private CmdRegistry() {
@@ -27,9 +47,6 @@ public class CmdRegistry {
     }
 
     private void registerAllCmds() {
-        var cmds = List.of(
-            new JoinDateCmd()
-        );
         for (var cmd : cmds) {
             registerCmd(cmd);
         }

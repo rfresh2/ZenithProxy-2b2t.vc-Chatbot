@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static com.github.rfresh2.EventConsumer.of;
-import static com.zenith.Globals.CACHE;
 import static vc.bot.VcBotPlugin.PLUGIN_CONFIG;
 
 public class VcChatbotModule extends Module {
@@ -29,9 +28,6 @@ public class VcChatbotModule extends Module {
     }
 
     void onPublicChat(PublicChatEvent event) {
-        if (event.sender().getProfileId().equals(CACHE.getProfileCache().getProfile().getId())) {
-            return;
-        }
         var input = event.message().trim();
         if (!input.startsWith(PLUGIN_CONFIG.prefix)) {
             return;
@@ -56,6 +52,8 @@ public class VcChatbotModule extends Module {
                 return;
             }
             sendClientPacketAsync(new ServerboundChatPacket(ChatUtil.sanitizeChatMessage(result)));
+        } catch (IllegalArgumentException e) {
+            debug(msg, e);
         } catch (Exception e) {
             error(msg, e);
         }

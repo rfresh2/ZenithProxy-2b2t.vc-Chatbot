@@ -22,7 +22,9 @@ public class VcChatbotCommand extends Command {
             .name("vc")
             .category(CommandCategory.MODULE)
             .description("""
-             Ingame chatbot, powered by https://api.2b2t.vc
+             In-game 2b2t chatbot, powered by https://api.2b2t.vc
+             
+             You don't need an API key, but getting one may help avoid rate limits.
              """)
             .usageLines(
                 "on/off",
