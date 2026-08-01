@@ -31,7 +31,7 @@ How to install ZenithProxy plugins: https://wiki.2b2t.vc/Plugins/
 
 by default, the `!` prefix is used to run ZenithProxy commands
 
-to run chatbot commands, use `!!` as the prefix instead. The first one will be cancelled.
+to run chatbot commands from public chat type `!!` instead. The first `!` will be canceled.
 
 or you could change the default prefix to something else: `commandConfig ingame prefix <prefix>`
 
@@ -42,3 +42,7 @@ Yes, that's the idea! Anyone can run their own 2b2t chatbot with this plugin.
 This plugin uses the public 2b2t.vc api: https://api.2b2t.vc
 
 You don't need an API key, but getting one may help avoid rate limits.
+
+#### Will this plugin only work on 2b2t?
+
+It will work on other MC servers, but https://api.2b2t.vc only tracks and returns data about 2b2t.
