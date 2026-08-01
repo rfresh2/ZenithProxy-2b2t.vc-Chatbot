@@ -41,10 +41,17 @@ public class VcChatbotModule extends Module {
 
     void onPublicChat(PublicChatEvent event) {
         var input = event.message().trim();
+        if (!PLUGIN_CONFIG.prefix.contains(">")) {
+            // chop off any greentext prefix
+            while (input.startsWith(">") && input.contains(PLUGIN_CONFIG.prefix)) {
+                input = input.substring(1).trim();
+            }
+        }
         if (!input.startsWith(PLUGIN_CONFIG.prefix)) {
             return;
         }
         var msg = input.substring(PLUGIN_CONFIG.prefix.length());
+        if (msg.isBlank() || msg.charAt(0) == ' ') return;
         var msgSplit = Stream.of(msg.split(" "))
             .map(String::trim)
             .filter(s -> !s.isBlank())
