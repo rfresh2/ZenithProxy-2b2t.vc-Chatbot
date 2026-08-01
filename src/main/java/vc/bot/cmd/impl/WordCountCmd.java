@@ -1,17 +1,14 @@
-package vc.bot.module.cmd.impl;
+package vc.bot.cmd.impl;
 
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.jspecify.annotations.Nullable;
-import vc.bot.module.cmd.Cmd;
+import vc.bot.api.ApiClients;
+import vc.bot.cmd.Cmd;
 import vc.bot.openapi.handler.ApiException;
-import vc.bot.openapi.handler.ChatsApi;
 
-import java.time.Duration;
 import java.util.List;
 
 public class WordCountCmd extends Cmd {
-    private final ChatsApi chatsApi = new ChatsApi(apiClient().setReadTimeout(Duration.ofSeconds(60)));
-
     @Override
     public List<String> cmdAliases() {
         return List.of("wc", "wordcount", "clout", "word");
@@ -30,7 +27,7 @@ public class WordCountCmd extends Cmd {
             return "Invalid word length, 4 <= length <= 16";
         }
         try {
-            var response = chatsApi.wordCount(word);
+            var response = ApiClients.INSTANCE.chatsApi().wordCount(word);
             if (response == null) {
                 return null;
             }

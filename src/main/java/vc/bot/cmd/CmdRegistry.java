@@ -1,6 +1,6 @@
-package vc.bot.module.cmd;
+package vc.bot.cmd;
 
-import vc.bot.module.cmd.impl.*;
+import vc.bot.cmd.impl.*;
 
 import java.util.HashMap;
 import java.util.List;

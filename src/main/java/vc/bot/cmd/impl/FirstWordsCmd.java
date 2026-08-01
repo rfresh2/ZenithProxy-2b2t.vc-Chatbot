@@ -1,21 +1,17 @@
-package vc.bot.module.cmd.impl;
+package vc.bot.cmd.impl;
 
-import com.zenith.util.math.MathHelper;
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.jspecify.annotations.Nullable;
-import vc.bot.module.cmd.Cmd;
+import vc.bot.api.ApiClients;
+import vc.bot.cmd.Cmd;
 import vc.bot.openapi.handler.ApiException;
-import vc.bot.openapi.handler.PlaytimeApi;
 
-import java.time.Duration;
 import java.util.List;
 
-public class PlaytimeCmd extends Cmd {
-    private final PlaytimeApi playtimeApi = new PlaytimeApi(apiClient());
-
+public class FirstWordsCmd extends Cmd {
     @Override
     public List<String> cmdAliases() {
-        return List.of("playtime", "pt");
+        return List.of("firstwords");
     }
 
     @Override
@@ -25,17 +21,17 @@ public class PlaytimeCmd extends Cmd {
             return null;
         }
         try {
-            var response = playtimeApi.playtime(targetProfile.get().uuid(), targetProfile.get().name());
+            var response = ApiClients.INSTANCE.chatsApi().chats(null, targetProfile.get().name(), targetProfile.get().uuid(), null, null, "asc", 1, 0);
             if (response == null) {
                 return null;
             }
-            if (response.getPlaytimeSeconds() == null) {
+            if (response.getChats().isEmpty()) {
                 return "No data found for %s".formatted(targetProfile.get().name());
             }
-            var durationStr = MathHelper.formatDuration(Duration.ofSeconds(response.getPlaytimeSeconds()));
-            return "%s has played for %s".formatted(
+            return "[%s] <%s> %s".formatted(
+                dateTimeFormatter().format(response.getChats().getFirst().getTime()),
                 targetProfile.get().name(),
-                durationStr
+                response.getChats().getFirst().getChat()
             );
         } catch (ApiException e) {
             if (e.getCode() == 204) {

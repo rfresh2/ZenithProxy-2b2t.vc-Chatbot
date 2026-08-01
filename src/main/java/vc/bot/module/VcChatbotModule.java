@@ -10,8 +10,8 @@ import com.zenith.util.timer.Timer;
 import com.zenith.util.timer.Timers;
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundChatPacket;
-import vc.bot.module.cmd.Cmd;
-import vc.bot.module.cmd.CmdRegistry;
+import vc.bot.cmd.Cmd;
+import vc.bot.cmd.CmdRegistry;
 
 import java.util.Collections;
 import java.util.List;

@@ -1,19 +1,17 @@
-package vc.bot.module.cmd.impl;
+package vc.bot.cmd.impl;
 
 import com.zenith.util.math.MathHelper;
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.jspecify.annotations.Nullable;
-import vc.bot.module.cmd.Cmd;
+import vc.bot.api.ApiClients;
+import vc.bot.cmd.Cmd;
 import vc.bot.openapi.handler.ApiException;
-import vc.bot.openapi.handler.StatsApi;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
 
 public class NoLifeCmd extends Cmd {
-    private final StatsApi statsApi = new StatsApi(apiClient());
-
     @Override
     public List<String> cmdAliases() {
         return List.of("nolife");
@@ -26,7 +24,7 @@ public class NoLifeCmd extends Cmd {
             return null;
         }
         try {
-            var response = statsApi.playerStats(targetProfile.get().uuid(), targetProfile.get().name());
+            var response = ApiClients.INSTANCE.statsApi().playerStats(targetProfile.get().uuid(), targetProfile.get().name());
             if (response == null) {
                 return null;
             }

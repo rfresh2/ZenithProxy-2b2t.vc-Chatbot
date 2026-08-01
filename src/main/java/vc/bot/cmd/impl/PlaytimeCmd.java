@@ -1,19 +1,19 @@
-package vc.bot.module.cmd.impl;
+package vc.bot.cmd.impl;
 
+import com.zenith.util.math.MathHelper;
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.jspecify.annotations.Nullable;
-import vc.bot.module.cmd.Cmd;
+import vc.bot.api.ApiClients;
+import vc.bot.cmd.Cmd;
 import vc.bot.openapi.handler.ApiException;
-import vc.bot.openapi.handler.SeenApi;
 
+import java.time.Duration;
 import java.util.List;
 
-public class FirstSeenCmd extends Cmd {
-    private final SeenApi seenApi = new SeenApi(apiClient());
-
+public class PlaytimeCmd extends Cmd {
     @Override
     public List<String> cmdAliases() {
-        return List.of("joindate", "join", "jd", "firstseen");
+        return List.of("playtime", "pt");
     }
 
     @Override
@@ -23,17 +23,18 @@ public class FirstSeenCmd extends Cmd {
             return null;
         }
         try {
-            var response = seenApi.seen(targetProfile.get().uuid(), targetProfile.get().name());
+            var response = ApiClients.INSTANCE.playtimeApi().playtime(targetProfile.get().uuid(), targetProfile.get().name());
             if (response == null) {
                 return null;
             }
-            var firstSeen = response.getFirstSeen();
-            if (firstSeen == null) {
+            if (response.getPlaytimeSeconds() == null) {
                 return "No data found for %s".formatted(targetProfile.get().name());
             }
-            var dateFmt = defaultDateFormatter()
-                .format(firstSeen);
-            return "%s was first seen on %s".formatted(targetProfile.get().name(), dateFmt);
+            var durationStr = MathHelper.formatDuration(Duration.ofSeconds(response.getPlaytimeSeconds()));
+            return "%s has played for %s".formatted(
+                targetProfile.get().name(),
+                durationStr
+            );
         } catch (ApiException e) {
             if (e.getCode() == 204) {
                 return "No data found for %s".formatted(targetProfile.get().name());

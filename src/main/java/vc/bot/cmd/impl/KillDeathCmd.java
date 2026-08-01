@@ -1,19 +1,17 @@
-package vc.bot.module.cmd.impl;
+package vc.bot.cmd.impl;
 
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.jspecify.annotations.Nullable;
-import vc.bot.module.cmd.Cmd;
+import vc.bot.api.ApiClients;
+import vc.bot.cmd.Cmd;
 import vc.bot.openapi.handler.ApiException;
-import vc.bot.openapi.handler.DeathsApi;
 
 import java.util.List;
 
-public class FirstKillCmd extends Cmd {
-    private final DeathsApi deathsApi = new DeathsApi(apiClient());
-
+public class KillDeathCmd extends Cmd {
     @Override
     public List<String> cmdAliases() {
-        return List.of("firstkill", "fk");
+        return List.of("kd", "kills", "deaths");
     }
 
     @Override
@@ -23,16 +21,19 @@ public class FirstKillCmd extends Cmd {
             return null;
         }
         try {
-            var response = deathsApi.kills(targetProfile.get().uuid(), targetProfile.get().name(), null, null, "asc", 1, null);
+            var response = ApiClients.INSTANCE.statsApi().playerStats(targetProfile.get().uuid(), targetProfile.get().name());
             if (response == null) {
                 return null;
             }
-            if (response.getKills().isEmpty()) {
-                return "No data found for %s".formatted(targetProfile.get().name());
-            }
-            return "[%s] %s".formatted(
-                defaultDateFormatter().format(response.getKills().getFirst().getTime()),
-                response.getKills().getFirst().getDeathMessage()
+            return "%s has: %s kills, %s deaths, %.2f K/D".formatted(
+                targetProfile.get().name(),
+                response.getKillCount(),
+                response.getDeathCount(),
+                response.getDeathCount() == 0
+                    ? response.getKillCount() == 0
+                        ? "0"
+                        : "1.0"
+                    : response.getKillCount() / (double) response.getDeathCount()
             );
         } catch (ApiException e) {
             if (e.getCode() == 204) {

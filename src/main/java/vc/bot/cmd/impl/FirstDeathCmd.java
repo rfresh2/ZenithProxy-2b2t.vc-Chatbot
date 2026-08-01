@@ -1,16 +1,14 @@
-package vc.bot.module.cmd.impl;
+package vc.bot.cmd.impl;
 
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.jspecify.annotations.Nullable;
-import vc.bot.module.cmd.Cmd;
+import vc.bot.api.ApiClients;
+import vc.bot.cmd.Cmd;
 import vc.bot.openapi.handler.ApiException;
-import vc.bot.openapi.handler.DeathsApi;
 
 import java.util.List;
 
 public class FirstDeathCmd extends Cmd {
-    private final DeathsApi deathsApi = new DeathsApi(apiClient());
-
     @Override
     public List<String> cmdAliases() {
         return List.of("firstdeath", "fd");
@@ -23,7 +21,7 @@ public class FirstDeathCmd extends Cmd {
             return null;
         }
         try {
-            var response = deathsApi.deaths(targetProfile.get().uuid(), targetProfile.get().name(), null, null, "asc", 1, null);
+            var response = ApiClients.INSTANCE.deathsApi().deaths(targetProfile.get().uuid(), targetProfile.get().name(), null, null, "asc", 1, null);
             if (response == null) {
                 return null;
             }
@@ -31,7 +29,7 @@ public class FirstDeathCmd extends Cmd {
                 return "No data found for %s".formatted(targetProfile.get().name());
             }
             return "[%s] %s".formatted(
-                defaultDateFormatter().format(response.getDeaths().getFirst().getTime()),
+                dateTimeFormatter().format(response.getDeaths().getFirst().getTime()),
                 response.getDeaths().getFirst().getDeathMessage()
             );
         } catch (ApiException e) {

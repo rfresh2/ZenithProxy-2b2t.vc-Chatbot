@@ -1,12 +1,12 @@
-package vc.bot.module.cmd.impl;
+package vc.bot.cmd.impl;
 
 import com.zenith.feature.player.World;
 import com.zenith.mc.dimension.DimensionRegistry;
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.jspecify.annotations.Nullable;
-import vc.bot.module.cmd.Cmd;
+import vc.bot.api.ApiClients;
+import vc.bot.cmd.Cmd;
 import vc.bot.openapi.handler.ApiException;
-import vc.bot.openapi.handler.TimeApi;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -15,8 +15,6 @@ import java.util.List;
 import static com.zenith.Globals.CACHE;
 
 public class TimeCmd extends Cmd {
-    private final TimeApi timeApi = new TimeApi(apiClient());
-
     @Override
     public List<String> cmdAliases() {
         return List.of("time");
@@ -30,7 +28,7 @@ public class TimeCmd extends Cmd {
         long curTickTime;
         if (World.getCurrentDimension() != DimensionRegistry.OVERWORLD.get() || worldTimeData == null) {
             try {
-                var response = timeApi.getWorldTime();
+                var response = ApiClients.INSTANCE.timeApi().getWorldTime();
                 if (response == null) {
                     return null;
                 }

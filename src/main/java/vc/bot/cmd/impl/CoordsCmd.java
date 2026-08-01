@@ -1,8 +1,8 @@
-package vc.bot.module.cmd.impl;
+package vc.bot.cmd.impl;
 
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.jspecify.annotations.Nullable;
-import vc.bot.module.cmd.Cmd;
+import vc.bot.cmd.Cmd;
 import vc.bot.openapi.handler.ApiException;
 
 import java.util.List;

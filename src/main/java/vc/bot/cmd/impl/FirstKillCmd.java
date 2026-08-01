@@ -1,20 +1,17 @@
-package vc.bot.module.cmd.impl;
+package vc.bot.cmd.impl;
 
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.jspecify.annotations.Nullable;
-import vc.bot.module.cmd.Cmd;
+import vc.bot.api.ApiClients;
+import vc.bot.cmd.Cmd;
 import vc.bot.openapi.handler.ApiException;
-import vc.bot.openapi.handler.ChatsApi;
 
-import java.time.Duration;
 import java.util.List;
 
-public class FirstWordsCmd extends Cmd {
-    private final ChatsApi chatsApi = new ChatsApi(apiClient().setReadTimeout(Duration.ofSeconds(60)));
-
+public class FirstKillCmd extends Cmd {
     @Override
     public List<String> cmdAliases() {
-        return List.of("firstwords");
+        return List.of("firstkill", "fk");
     }
 
     @Override
@@ -24,17 +21,16 @@ public class FirstWordsCmd extends Cmd {
             return null;
         }
         try {
-            var response = chatsApi.chats(null, targetProfile.get().name(), targetProfile.get().uuid(), null, null, "asc", 1, 0);
+            var response = ApiClients.INSTANCE.deathsApi().kills(targetProfile.get().uuid(), targetProfile.get().name(), null, null, "asc", 1, null);
             if (response == null) {
                 return null;
             }
-            if (response.getChats().isEmpty()) {
+            if (response.getKills().isEmpty()) {
                 return "No data found for %s".formatted(targetProfile.get().name());
             }
-            return "[%s] <%s> %s".formatted(
-                defaultDateFormatter().format(response.getChats().getFirst().getTime()),
-                targetProfile.get().name(),
-                response.getChats().getFirst().getChat()
+            return "[%s] %s".formatted(
+                dateTimeFormatter().format(response.getKills().getFirst().getTime()),
+                response.getKills().getFirst().getDeathMessage()
             );
         } catch (ApiException e) {
             if (e.getCode() == 204) {

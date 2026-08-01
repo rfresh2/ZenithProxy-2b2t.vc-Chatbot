@@ -1,18 +1,15 @@
-package vc.bot.module.cmd.impl;
+package vc.bot.cmd.impl;
 
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.jspecify.annotations.Nullable;
-import vc.bot.module.cmd.Cmd;
+import vc.bot.api.ApiClients;
+import vc.bot.cmd.Cmd;
 import vc.bot.openapi.handler.ApiException;
-import vc.bot.openapi.handler.ChatsApi;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class QuoteCmd extends Cmd {
-    private final ChatsApi chatsApi = new ChatsApi(apiClient().setReadTimeout(Duration.ofSeconds(60)));
-
     @Override
     public List<String> cmdAliases() {
         return List.of("quote");
@@ -25,7 +22,7 @@ public class QuoteCmd extends Cmd {
             return null;
         }
         try {
-            var response = chatsApi.chats(null, targetProfile.get().name(), targetProfile.get().uuid(), null, null, "desc", 100, null);
+            var response = ApiClients.INSTANCE.chatsApi().chats(null, targetProfile.get().name(), targetProfile.get().uuid(), null, null, "desc", 100, null);
             if (response == null) {
                 return null;
             }
@@ -36,7 +33,7 @@ public class QuoteCmd extends Cmd {
             if (response.getPageCount() > 1) {
                 var randomPage = ThreadLocalRandom.current().nextInt(1, response.getPageCount() + 1);
                 try {
-                    var response2 = chatsApi.chats(null, targetProfile.get().name(), targetProfile.get().uuid(), null, null, "desc", 100, randomPage);
+                    var response2 = ApiClients.INSTANCE.chatsApi().chats(null, targetProfile.get().name(), targetProfile.get().uuid(), null, null, "desc", 100, randomPage);
                     if (response2 != null && !response2.getChats().isEmpty()) {
                         chat = response2.getChats().get(ThreadLocalRandom.current().nextInt(0, response2.getChats().size()));
                     }
@@ -47,7 +44,7 @@ public class QuoteCmd extends Cmd {
                 }
             }
             return "[%s] <%s> %s".formatted(
-                defaultDateFormatter().format(chat.getTime()),
+                dateTimeFormatter().format(chat.getTime()),
                 targetProfile.get().name(),
                 chat.getChat());
         } catch (ApiException e) {
