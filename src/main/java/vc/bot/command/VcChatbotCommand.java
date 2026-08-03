@@ -33,7 +33,8 @@ public class VcChatbotCommand extends Command {
                 "prefix <prefix>",
                 "apiKey set <key>",
                 "apiKey clear",
-                "chatCooldown <ticks>"
+                "chatCooldown <ticks>",
+                "appendRandom on/off"
             )
             .build();
     }
@@ -67,6 +68,11 @@ public class VcChatbotCommand extends Command {
                 PLUGIN_CONFIG.chatCooldownTicks = getTime(c, "ticks");
                 c.getSource().getEmbed()
                     .title("Chat Cooldown Set");
+            })))
+            .then(literal("appendRandom").then(argument("toggle", toggle()).executes(c -> {
+                PLUGIN_CONFIG.appendRandom = getToggle(c, "toggle");
+                c.getSource().getEmbed()
+                    .title("Append Random Set");
             })));
     }
 
@@ -80,6 +86,7 @@ public class VcChatbotCommand extends Command {
                 PLUGIN_CONFIG.chatCooldownTicks,
                 PLUGIN_CONFIG.chatCooldownTicks / 20.0
             ))
+            .addField("Append Random", toggleStr(PLUGIN_CONFIG.appendRandom))
             .primaryColor();
     }
 

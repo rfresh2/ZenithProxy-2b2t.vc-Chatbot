@@ -15,6 +15,7 @@ import vc.bot.cmd.CmdRegistry;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Stream;
@@ -82,6 +83,9 @@ public class VcChatbotModule extends Module {
             }
             Wait.waitUntil(() -> chatCooldownTimer.tick(PLUGIN_CONFIG.chatCooldownTicks), (PLUGIN_CONFIG.chatCooldownTicks / 20) + 1);
             if (!isEnabled()) return;
+            if (PLUGIN_CONFIG.appendRandom) {
+                result += " [" + UUID.randomUUID().toString().substring(0, 6) + "]";
+            }
             sendClientPacketAsync(new ServerboundChatPacket(ChatUtil.sanitizeChatMessage(result)));
         } catch (IllegalArgumentException e) {
             debug(msg, e);
