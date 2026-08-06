@@ -12,10 +12,10 @@ import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundChatPacket;
 import vc.bot.cmd.Cmd;
 import vc.bot.cmd.CmdRegistry;
+import vc.bot.util.RandomString;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Stream;
@@ -87,7 +87,7 @@ public class VcChatbotModule extends Module {
                 result = PLUGIN_CONFIG.responsePrefix + result;
             }
             if (PLUGIN_CONFIG.appendRandomSuffix) {
-                result += " [" + UUID.randomUUID().toString().substring(0, 6) + "]";
+                result += " [" + RandomString.generate(6) + "]";
             }
             sendClientPacketAsync(new ServerboundChatPacket(ChatUtil.sanitizeChatMessage(result)));
         } catch (IllegalArgumentException e) {
