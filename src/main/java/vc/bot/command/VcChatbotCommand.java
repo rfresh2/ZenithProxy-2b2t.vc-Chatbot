@@ -7,6 +7,7 @@ import com.zenith.command.api.CommandContext;
 import com.zenith.command.api.CommandUsage;
 import vc.bot.module.VcChatbotModule;
 
+import static com.mojang.brigadier.arguments.StringArgumentType.greedyString;
 import static com.zenith.Globals.MODULE;
 import static com.zenith.command.brigadier.CustomStringArgumentType.getString;
 import static com.zenith.command.brigadier.CustomStringArgumentType.wordWithChars;
@@ -34,7 +35,9 @@ public class VcChatbotCommand extends Command {
                 "apiKey set <key>",
                 "apiKey clear",
                 "chatCooldown <ticks>",
-                "appendRandom on/off"
+                "appendRandom on/off",
+                "responsePrefix on/off",
+                "responsePrefix set <prefix>"
             )
             .build();
     }
@@ -70,10 +73,21 @@ public class VcChatbotCommand extends Command {
                     .title("Chat Cooldown Set");
             })))
             .then(literal("appendRandom").then(argument("toggle", toggle()).executes(c -> {
-                PLUGIN_CONFIG.appendRandom = getToggle(c, "toggle");
+                PLUGIN_CONFIG.appendRandomSuffix = getToggle(c, "toggle");
                 c.getSource().getEmbed()
                     .title("Append Random Set");
-            })));
+            })))
+            .then(literal("responsePrefix")
+                .then(argument("toggle", toggle()).executes(c -> {
+                    PLUGIN_CONFIG.responsePrefixEnabled = getToggle(c, "toggle");
+                    c.getSource().getEmbed()
+                        .title("Response Prefix " + toggleStrCaps(PLUGIN_CONFIG.responsePrefixEnabled));
+                }))
+                .then(literal("set").then(argument("prefix", greedyString()).executes(c -> {
+                    PLUGIN_CONFIG.responsePrefix = getString(c, "prefix");
+                    c.getSource().getEmbed()
+                        .title("Response Prefix Set");
+                }))));
     }
 
     @Override
@@ -86,7 +100,8 @@ public class VcChatbotCommand extends Command {
                 PLUGIN_CONFIG.chatCooldownTicks,
                 PLUGIN_CONFIG.chatCooldownTicks / 20.0
             ))
-            .addField("Append Random", toggleStr(PLUGIN_CONFIG.appendRandom))
+            .addField("Append Random", toggleStr(PLUGIN_CONFIG.appendRandomSuffix))
+            .addField("Response Prefix", PLUGIN_CONFIG.responsePrefixEnabled ? escape(PLUGIN_CONFIG.responsePrefix) : "(disabled)")
             .primaryColor();
     }
 
