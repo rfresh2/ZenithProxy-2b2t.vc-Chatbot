@@ -38,8 +38,8 @@ repositories {
 dependencies {
     zenithProxy("com.zenith:ZenithProxy:$mc-SNAPSHOT")
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")
-    compileOnly("jakarta.annotation:jakarta.annotation-api:1.3.5")
-    shade("org.openapitools:jackson-databind-nullable:0.2.10")
+    compileOnly("jakarta.annotation:jakarta.annotation-api:3.0.0")
+    shade("org.openapitools:jackson-databind-nullable:0.2.11")
     /** to include dependencies into your plugin jar **/
 //    shade("com.github.ben-manes.caffeine:caffeine:3.2.0")
 }
