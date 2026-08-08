@@ -1,13 +1,11 @@
 package vc.bot.cmd.impl;
 
-import com.zenith.util.math.MathHelper;
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.jspecify.annotations.Nullable;
 import vc.bot.api.ApiClients;
 import vc.bot.cmd.Cmd;
 import vc.bot.openapi.handler.ApiException;
 
-import java.time.Duration;
 import java.util.List;
 
 public class PlaytimeCmd extends Cmd {
@@ -30,7 +28,7 @@ public class PlaytimeCmd extends Cmd {
             if (response.getPlaytimeSeconds() == null) {
                 return "No data found for %s".formatted(targetProfile.get().name());
             }
-            var durationStr = MathHelper.formatDuration(Duration.ofSeconds(response.getPlaytimeSeconds()));
+            var durationStr = formatDuration(response.getPlaytimeSeconds());
             return "%s has played for %s".formatted(
                 targetProfile.get().name(),
                 durationStr

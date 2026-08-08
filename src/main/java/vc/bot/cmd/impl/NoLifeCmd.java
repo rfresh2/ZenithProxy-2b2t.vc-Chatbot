@@ -1,6 +1,5 @@
 package vc.bot.cmd.impl;
 
-import com.zenith.util.math.MathHelper;
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.jspecify.annotations.Nullable;
 import vc.bot.api.ApiClients;
@@ -37,7 +36,7 @@ public class NoLifeCmd extends Cmd {
             return "%s has wasted %.2f%% of their life since joining! Avg per day: %s".formatted(
                 targetProfile.get().name(),
                 proportionOnline * 100.0,
-                MathHelper.formatDuration(durationPerDay)
+                formatDuration(durationPerDay.toSeconds())
             );
         } catch (ApiException e) {
             if (e.getCode() == 204) {

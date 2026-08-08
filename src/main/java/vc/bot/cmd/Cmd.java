@@ -10,6 +10,7 @@ import vc.bot.openapi.handler.ApiException;
 
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -43,5 +44,31 @@ public abstract class Cmd extends ModuleUtils {
             return Optional.of(new TablistProfileData(sender.getName(), sender.getProfileId()));
         }
         return resolveProfileData(args.getFirst());
+    }
+
+    public String formatDuration(long durationInSeconds) {
+        var secondsInMinute = 60L;
+        var secondsInHour = secondsInMinute * 60L;
+        var secondsInDay = secondsInHour * 24L;
+        var secondsInMonth = secondsInDay * 30L; // assuming 30 days per month
+        var secondsInYear = secondsInMonth * 12L;
+
+        var years = durationInSeconds / secondsInYear;
+        var months = (durationInSeconds % secondsInYear) / secondsInMonth;
+        var days = (durationInSeconds % secondsInMonth) / secondsInDay;
+        var hours = (durationInSeconds % secondsInDay) / secondsInHour;
+        List<String> entries = new ArrayList<>(4);
+        if (years > 0) entries.add(years + "y");
+        if (months > 0) entries.add(months + "mo");
+        if (days > 0) entries.add(days + "d");
+        if (hours > 0) entries.add(hours + "h");
+        if (entries.isEmpty()) {
+            var minutes = (double) durationInSeconds / (double)secondsInMinute;
+            if (minutes == 0.0) {
+                return "0m";
+            }
+            return String.format("%.2fm", minutes);
+        }
+        return String.join(", ", entries);
     }
 }
