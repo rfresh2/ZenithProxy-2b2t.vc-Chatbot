@@ -31,6 +31,8 @@ public class VcChatbotCommand extends Command {
              """)
             .usageLines(
                 "on/off",
+                "publicChat on/off",
+                "whispers on/off",
                 "prefix <prefix>",
                 "apiKey set <key>",
                 "apiKey clear",
@@ -51,6 +53,16 @@ public class VcChatbotCommand extends Command {
                 c.getSource().getEmbed()
                     .title("Chatbot " + toggleStrCaps(PLUGIN_CONFIG.enabled));
             }))
+            .then(literal("publicChat").then(argument("toggle", toggle()).executes(c -> {
+                PLUGIN_CONFIG.publicChat = getToggle(c, "toggle");
+                c.getSource().getEmbed()
+                    .title("Public Chat " + toggleStrCaps(PLUGIN_CONFIG.publicChat));
+            })))
+            .then(literal("whispers").then(argument("toggle", toggle()).executes(c -> {
+                PLUGIN_CONFIG.whispers = getToggle(c, "toggle");
+                c.getSource().getEmbed()
+                    .title("Whispers " + toggleStrCaps(PLUGIN_CONFIG.whispers));
+            })))
             .then(literal("prefix").then(argument("prefix", wordWithChars()).executes(c -> {
                 PLUGIN_CONFIG.prefix = getString(c, "prefix");
                 c.getSource().getEmbed()
@@ -94,6 +106,8 @@ public class VcChatbotCommand extends Command {
     public void defaultHandler(final CommandContext context) {
         context.getEmbed()
             .addField("Chatbot", toggleStr(PLUGIN_CONFIG.enabled))
+            .addField("Public Chat", toggleStr(PLUGIN_CONFIG.publicChat))
+            .addField("Whispers", toggleStr(PLUGIN_CONFIG.whispers))
             .addField("Prefix", escape(PLUGIN_CONFIG.prefix))
             .addField("API Key", PLUGIN_CONFIG.apiKey.isEmpty() ? "(none)" : escape(PLUGIN_CONFIG.apiKey))
             .addField("Chat Cooldown", "%s ticks (%.2f seconds)".formatted(

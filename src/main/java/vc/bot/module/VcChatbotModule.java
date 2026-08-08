@@ -3,13 +3,16 @@ package vc.bot.module;
 import com.github.rfresh2.EventConsumer;
 import com.zenith.Proxy;
 import com.zenith.event.chat.PublicChatEvent;
+import com.zenith.event.chat.WhisperChatEvent;
 import com.zenith.module.api.Module;
 import com.zenith.util.ChatUtil;
 import com.zenith.util.Wait;
 import com.zenith.util.timer.Timer;
 import com.zenith.util.timer.Timers;
+import org.geysermc.mcprotocollib.protocol.codec.MinecraftPacket;
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundChatPacket;
+import org.jspecify.annotations.Nullable;
 import vc.bot.cmd.Cmd;
 import vc.bot.cmd.CmdRegistry;
 import vc.bot.util.RandomString;
@@ -36,12 +39,28 @@ public class VcChatbotModule extends Module {
     @Override
     public List<EventConsumer<?>> registerEvents() {
         return List.of(
-            of(PublicChatEvent.class, this::onPublicChat)
+            of(PublicChatEvent.class, this::onPublicChat),
+            of(WhisperChatEvent.class, this::onWhisper)
         );
     }
 
+    interface CommandResponder {
+        @Nullable MinecraftPacket buildResponsePacket(String response);
+    }
+
     void onPublicChat(PublicChatEvent event) {
-        var input = event.message().trim();
+        if (!PLUGIN_CONFIG.publicChat) return;
+        handleIncoming(event.message(), event.sender(), ServerboundChatPacket::new);
+    }
+
+    private void onWhisper(WhisperChatEvent event) {
+        if (!PLUGIN_CONFIG.whispers) return;
+        if (event.outgoing()) return;
+        handleIncoming(event.message(), event.sender(), r -> ChatUtil.getWhisperChatPacket(event.sender().getName(), r));
+    }
+
+    private void handleIncoming(String input, PlayerListEntry sender, CommandResponder responder) {
+        input = input.trim();
         if (!PLUGIN_CONFIG.prefix.contains(">")) {
             // chop off any greentext prefix
             while (input.startsWith(">") && input.toLowerCase().contains(PLUGIN_CONFIG.prefix)) {
@@ -67,10 +86,10 @@ public class VcChatbotModule extends Module {
         }
         List<String> argsList = msgSplit.size() == 1 ? Collections.emptyList() : msgSplit.subList(1, msgSplit.size());
         // we are already on an executor thread, but we would otherwise block other event consumers
-        cmdExecutor.execute(() -> execute(msg, cmd, event.sender(), argsList));
+        cmdExecutor.execute(() -> execute(msg, cmd, sender, argsList, responder));
     }
 
-    private void execute(String msg, Cmd cmd, PlayerListEntry sender, List<String> argsList) {
+    private void execute(String msg, Cmd cmd, PlayerListEntry sender, List<String> argsList, CommandResponder responder) {
         try {
             // we could potentially have a backlog of commands being executed after dc
             // so just sanity check we and the sender are still online
@@ -89,7 +108,10 @@ public class VcChatbotModule extends Module {
             if (PLUGIN_CONFIG.appendRandomSuffix) {
                 result += " [" + RandomString.generate(6) + "]";
             }
-            sendClientPacketAsync(new ServerboundChatPacket(ChatUtil.sanitizeChatMessage(result)));
+            var responsePacket = responder.buildResponsePacket(result);
+            if (responsePacket != null) {
+                sendClientPacketAsync(responsePacket);
+            }
         } catch (IllegalArgumentException e) {
             debug(msg, e);
         } catch (Exception e) {
