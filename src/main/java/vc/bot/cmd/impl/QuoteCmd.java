@@ -19,15 +19,15 @@ public class QuoteCmd extends Cmd {
     public @Nullable String handle(final PlayerListEntry sender, final List<String> args) throws ApiException {
         var targetProfile = target(sender, args);
         if (targetProfile.isEmpty()) {
-            return null;
+            return noPlayerFoundMsg(targetName(sender, args));
         }
         try {
             var response = ApiClients.INSTANCE.chatsApi().chats(null, targetProfile.get().name(), targetProfile.get().uuid(), null, null, "desc", 100, null);
             if (response == null) {
-                return null;
+                return noDataFoundMsg(targetProfile.get().name());
             }
             if (response.getChats().isEmpty()) {
-                return "No data found for %s".formatted(targetProfile.get().name());
+                return noDataFoundMsg(targetProfile.get().name());
             }
             var chat = response.getChats().get(ThreadLocalRandom.current().nextInt(0, response.getChats().size()));
             if (response.getPageCount() > 1) {
@@ -49,7 +49,7 @@ public class QuoteCmd extends Cmd {
                 chat.getChat());
         } catch (ApiException e) {
             if (e.getCode() == 204) {
-                return "No data found for %s".formatted(targetProfile.get().name());
+                return noDataFoundMsg(targetProfile.get().name());
             }
             error("API error", e);
             return null;

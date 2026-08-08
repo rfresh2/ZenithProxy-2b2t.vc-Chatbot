@@ -30,10 +30,10 @@ public class TimeCmd extends Cmd {
             try {
                 var response = ApiClients.INSTANCE.timeApi().getWorldTime();
                 if (response == null) {
-                    return null;
+                    return noDataFoundMsg();
                 }
                 if (response.getWorldTime() == null) {
-                    return "No data found";
+                    return noDataFoundMsg();
                 }
 
                 var worldTime = response.getWorldTime();
@@ -43,7 +43,7 @@ public class TimeCmd extends Cmd {
                 curTickTime = (worldTime + ticksLag) % 24000L;
             } catch (ApiException e) {
                 if (e.getCode() == 204) {
-                    return "No data found";
+                    return noDataFoundMsg();
                 }
                 error("API error", e);
                 return null;

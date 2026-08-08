@@ -19,7 +19,7 @@ public class PrioSlotsCmd extends Cmd {
         try {
             var response = ApiClients.INSTANCE.tabListApi().onlinePlayersInfo();
             if (response == null) {
-                return null;
+                return noDataFoundMsg();
             }
             return "Non-prio: %s - Prio: %s".formatted(
                 response.getNonPrioCount(),
@@ -27,7 +27,7 @@ public class PrioSlotsCmd extends Cmd {
             );
         } catch (ApiException e) {
             if (e.getCode() == 204) {
-                return "No data found";
+                return noDataFoundMsg();
             }
             error("API error", e);
             return null;

@@ -18,15 +18,15 @@ public class FirstKillCmd extends Cmd {
     public @Nullable String handle(final PlayerListEntry sender, final List<String> args) throws ApiException {
         var targetProfile = target(sender, args);
         if (targetProfile.isEmpty()) {
-            return null;
+            return noPlayerFoundMsg(targetName(sender, args));
         }
         try {
             var response = ApiClients.INSTANCE.deathsApi().kills(targetProfile.get().uuid(), targetProfile.get().name(), null, null, "asc", 1, null);
             if (response == null) {
-                return null;
+                return noDataFoundMsg(targetProfile.get().name());
             }
             if (response.getKills().isEmpty()) {
-                return "No data found for %s".formatted(targetProfile.get().name());
+                return noDataFoundMsg(targetProfile.get().name());
             }
             return "[%s] %s".formatted(
                 dateTimeFormatter().format(response.getKills().getFirst().getTime()),
@@ -34,7 +34,7 @@ public class FirstKillCmd extends Cmd {
             );
         } catch (ApiException e) {
             if (e.getCode() == 204) {
-                return "No data found for %s".formatted(targetProfile.get().name());
+                return noDataFoundMsg(targetProfile.get().name());
             }
             error("API error", e);
             return null;

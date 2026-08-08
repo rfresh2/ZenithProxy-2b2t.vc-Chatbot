@@ -18,15 +18,15 @@ public class FirstWordsCmd extends Cmd {
     public @Nullable String handle(final PlayerListEntry sender, final List<String> args) throws ApiException {
         var targetProfile = target(sender, args);
         if (targetProfile.isEmpty()) {
-            return null;
+            return noPlayerFoundMsg(targetName(sender, args));
         }
         try {
             var response = ApiClients.INSTANCE.chatsApi().chats(null, targetProfile.get().name(), targetProfile.get().uuid(), null, null, "asc", 1, 0);
             if (response == null) {
-                return null;
+                return noDataFoundMsg(targetProfile.get().name());
             }
             if (response.getChats().isEmpty()) {
-                return "No data found for %s".formatted(targetProfile.get().name());
+                return noDataFoundMsg(targetProfile.get().name());
             }
             return "[%s] <%s> %s".formatted(
                 dateTimeFormatter().format(response.getChats().getFirst().getTime()),
@@ -35,7 +35,7 @@ public class FirstWordsCmd extends Cmd {
             );
         } catch (ApiException e) {
             if (e.getCode() == 204) {
-                return "No data found for %s".formatted(targetProfile.get().name());
+                return noDataFoundMsg(targetProfile.get().name());
             }
             error("API error", e);
             return null;

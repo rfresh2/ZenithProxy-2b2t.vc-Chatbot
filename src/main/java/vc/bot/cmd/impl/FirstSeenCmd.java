@@ -18,23 +18,23 @@ public class FirstSeenCmd extends Cmd {
     public @Nullable String handle(final PlayerListEntry sender, final List<String> args) throws ApiException {
         var targetProfile = target(sender, args);
         if (targetProfile.isEmpty()) {
-            return null;
+            return noPlayerFoundMsg(targetName(sender, args));
         }
         try {
             var response = ApiClients.INSTANCE.seenApi().seen(targetProfile.get().uuid(), targetProfile.get().name());
             if (response == null) {
-                return null;
+                return noDataFoundMsg(targetProfile.get().name());
             }
             var firstSeen = response.getFirstSeen();
             if (firstSeen == null) {
-                return "No data found for %s".formatted(targetProfile.get().name());
+                return noDataFoundMsg(targetProfile.get().name());
             }
             var dateFmt = dateTimeFormatter()
                 .format(firstSeen);
             return "%s was first seen on %s".formatted(targetProfile.get().name(), dateFmt);
         } catch (ApiException e) {
             if (e.getCode() == 204) {
-                return "No data found for %s".formatted(targetProfile.get().name());
+                return noDataFoundMsg(targetProfile.get().name());
             }
             error("API error", e);
             return null;

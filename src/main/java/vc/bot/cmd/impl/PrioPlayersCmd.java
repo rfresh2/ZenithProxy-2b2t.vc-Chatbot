@@ -19,10 +19,10 @@ public class PrioPlayersCmd extends Cmd {
         try {
             var response = ApiClients.INSTANCE.priorityPlayersApi().priorityPlayers();
             if (response == null) {
-                return null;
+                return noDataFoundMsg();
             }
             if (response.getPlayers() == null) {
-                return "No data found";
+                return noDataFoundMsg();
             }
             var count = response.getPlayers().size();
             var moneyPerMonth = count * 20;
@@ -32,7 +32,7 @@ public class PrioPlayersCmd extends Cmd {
             );
         } catch (ApiException e) {
             if (e.getCode() == 204) {
-                return "No data found";
+                return noDataFoundMsg();
             }
             error("API error", e);
             return null;

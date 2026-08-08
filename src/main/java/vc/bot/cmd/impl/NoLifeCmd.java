@@ -20,12 +20,12 @@ public class NoLifeCmd extends Cmd {
     public @Nullable String handle(final PlayerListEntry sender, final List<String> args) throws ApiException {
         var targetProfile = target(sender, args);
         if (targetProfile.isEmpty()) {
-            return null;
+            return noPlayerFoundMsg(targetName(sender, args));
         }
         try {
             var response = ApiClients.INSTANCE.statsApi().playerStats(targetProfile.get().uuid(), targetProfile.get().name());
             if (response == null) {
-                return null;
+                return noDataFoundMsg(targetProfile.get().name());
             }
             var firstSeen = response.getFirstSeen();
             var ptSeconds = response.getPlaytimeSeconds();
@@ -40,7 +40,7 @@ public class NoLifeCmd extends Cmd {
             );
         } catch (ApiException e) {
             if (e.getCode() == 204) {
-                return "No data found for %s".formatted(targetProfile.get().name());
+                return noDataFoundMsg(targetProfile.get().name());
             }
             error("API error", e);
             return null;

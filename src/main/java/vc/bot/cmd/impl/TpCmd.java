@@ -18,7 +18,7 @@ public class TpCmd extends Cmd {
     public @Nullable String handle(final PlayerListEntry sender, final List<String> args) throws ApiException {
         var targetProfile = target(sender, args);
         if (targetProfile.isEmpty()) {
-            return null;
+            return noPlayerFoundMsg(targetName(sender, args));
         }
         return "%s has been teleported to %s %s".formatted(
             targetProfile.get().name(),

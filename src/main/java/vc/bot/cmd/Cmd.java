@@ -39,6 +39,13 @@ public abstract class Cmd extends ModuleUtils {
             .or(() -> PlayerListsManager.getProfileFromUsername(targetName));
     }
 
+    public String targetName(PlayerListEntry sender, List<String> args) {
+        if (args.isEmpty()) {
+            return sender.getName();
+        }
+        return args.getFirst();
+    }
+
     public Optional<ProfileData> target(PlayerListEntry sender, List<String> args) {
         if (args.isEmpty()) {
             return Optional.of(new TablistProfileData(sender.getName(), sender.getProfileId()));
@@ -70,5 +77,17 @@ public abstract class Cmd extends ModuleUtils {
             return String.format("%.2fm", minutes);
         }
         return String.join(", ", entries);
+    }
+
+    public String noPlayerFoundMsg(String input) {
+        return "Player not found";
+    }
+
+    public String noDataFoundMsg() {
+        return "No data found";
+    }
+
+    public String noDataFoundMsg(String player) {
+        return "No data found for %s".formatted(player);
     }
 }

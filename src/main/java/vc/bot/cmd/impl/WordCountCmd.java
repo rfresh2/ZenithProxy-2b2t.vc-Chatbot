@@ -17,11 +17,11 @@ public class WordCountCmd extends Cmd {
     @Override
     public @Nullable String handle(final PlayerListEntry sender, final List<String> args) throws ApiException {
         if (args.isEmpty()) {
-            return null;
+            return "No word provided!";
         }
         var word = String.join(" ", args);
         if (word.isBlank()) {
-            return null;
+            return "No word provided!";
         }
         if (word.length() < 3 || word.length() > 16) {
             return "Invalid word length, 4 <= length <= 16";
@@ -29,10 +29,10 @@ public class WordCountCmd extends Cmd {
         try {
             var response = ApiClients.INSTANCE.chatsApi().wordCount(word);
             if (response == null) {
-                return null;
+                return noDataFoundMsg();
             }
             if (response.getCount() == null) {
-                return "No data found";
+                return noDataFoundMsg();
             }
             return "the word '%s' has been seen %s times!".formatted(
                 word,
@@ -40,7 +40,7 @@ public class WordCountCmd extends Cmd {
             );
         } catch (ApiException e) {
             if (e.getCode() == 204) {
-                return "No data found";
+                return noDataFoundMsg();
             }
             error("API error", e);
             return null;

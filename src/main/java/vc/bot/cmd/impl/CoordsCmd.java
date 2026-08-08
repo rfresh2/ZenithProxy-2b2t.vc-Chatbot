@@ -18,7 +18,7 @@ public class CoordsCmd extends Cmd {
     public @Nullable String handle(final PlayerListEntry sender, final List<String> args) throws ApiException {
         var targetProfile = target(sender, args);
         if (targetProfile.isEmpty()) {
-            return null;
+            return noPlayerFoundMsg(targetName(sender, args));
         }
         return "%s's coords are %s %s".formatted(
             targetProfile.get().name(),
