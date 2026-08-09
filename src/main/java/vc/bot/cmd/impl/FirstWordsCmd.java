@@ -28,10 +28,11 @@ public class FirstWordsCmd extends Cmd {
             if (response.getChats().isEmpty()) {
                 return noDataFoundMsg(targetProfile.get().name());
             }
+            var chat = response.getChats().getFirst();
             return "[%s] <%s> %s".formatted(
-                dateTimeFormatter().format(response.getChats().getFirst().getTime()),
-                targetProfile.get().name(),
-                response.getChats().getFirst().getChat()
+                dateTimeFormatter().format(chat.getTime()),
+                chat.getPlayerName(),
+                chat.getChat()
             );
         } catch (ApiException e) {
             if (e.getCode() == 204) {
