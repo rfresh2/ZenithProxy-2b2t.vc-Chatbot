@@ -93,11 +93,18 @@ public class VcChatbotModule extends Module {
         try {
             // we could potentially have a backlog of commands being executed after dc
             // so just sanity check we and the sender are still online
-            if (!Proxy.getInstance().isConnected()) return;
-            if (CACHE.getTabListCache().get(sender.getProfileId()).isEmpty()) return;
+            if (!Proxy.getInstance().isConnected()) {
+                info("Not connected, ignoring cmd {}", msg);
+                return;
+            }
+            if (CACHE.getTabListCache().get(sender.getProfileId()).isEmpty()) {
+                info("Sender is offline, ignoring cmd {}", msg);
+                return;
+            }
             if (!isEnabled()) return;
             var result = cmd.handle(sender, argsList); // api call, will block for substantial time
             if (result == null) {
+                info("empty response for cmd {}", msg);
                 return;
             }
             Wait.waitUntil(() -> chatCooldownTimer.tick(PLUGIN_CONFIG.chatCooldownTicks), (PLUGIN_CONFIG.chatCooldownTicks / 20) + 1);
@@ -110,6 +117,7 @@ public class VcChatbotModule extends Module {
             }
             var responsePacket = responder.buildResponsePacket(result);
             if (responsePacket != null) {
+                info("{}", result);
                 sendClientPacketAsync(responsePacket);
             }
         } catch (IllegalArgumentException e) {

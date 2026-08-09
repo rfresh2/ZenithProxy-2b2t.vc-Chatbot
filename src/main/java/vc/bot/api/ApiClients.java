@@ -3,6 +3,7 @@ package vc.bot.api;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import vc.bot.BuildConstants;
+import vc.bot.VcBotPlugin;
 import vc.bot.openapi.handler.*;
 
 import java.net.http.HttpClient;
@@ -50,6 +51,9 @@ public class ApiClients {
                     b.header("X-API-Key", apiKey);
                 }
                 b.header("User-Agent", "ZenithProxy-2b2t.vc-Chatbot/%s/%s".formatted(CONFIG.authentication.username, BuildConstants.VERSION));
+            })
+            .setResponseInterceptor(r -> {
+                VcBotPlugin.LOG.info("{} -> {}", r.uri().toString(), r.statusCode());
             });
     }
 }
