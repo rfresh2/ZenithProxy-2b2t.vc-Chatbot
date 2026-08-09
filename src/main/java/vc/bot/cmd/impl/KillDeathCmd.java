@@ -31,8 +31,8 @@ public class KillDeathCmd extends Cmd {
                 response.getDeathCount(),
                 response.getDeathCount() == 0
                     ? response.getKillCount() == 0
-                        ? "0"
-                        : "1.0"
+                        ? 0
+                        : 1.0
                     : response.getKillCount() / (double) response.getDeathCount()
             );
         } catch (ApiException e) {
