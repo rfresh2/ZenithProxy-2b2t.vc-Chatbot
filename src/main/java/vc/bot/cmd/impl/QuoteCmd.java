@@ -45,7 +45,7 @@ public class QuoteCmd extends Cmd {
             }
             return "[%s] <%s> %s".formatted(
                 dateTimeFormatter().format(chat.getTime()),
-                targetProfile.get().name(),
+                chat.getPlayerName(),
                 chat.getChat());
         } catch (ApiException e) {
             if (e.getCode() == 204) {
