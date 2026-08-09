@@ -76,7 +76,7 @@ public abstract class Cmd extends ModuleUtils {
             }
             return String.format("%.2fm", minutes);
         }
-        return String.join(", ", entries);
+        return String.join(" ", entries);
     }
 
     public String noPlayerFoundMsg(String input) {
