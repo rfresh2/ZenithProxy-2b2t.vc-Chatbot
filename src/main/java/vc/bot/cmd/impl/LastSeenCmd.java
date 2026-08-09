@@ -20,6 +20,9 @@ public class LastSeenCmd extends Cmd {
         if (targetProfile.isEmpty()) {
             return noPlayerFoundMsg(targetName(sender, args));
         }
+        if (targetProfile.get() instanceof TablistProfileData) {
+            return "%s is online now".formatted(targetProfile.get().name());
+        }
         try {
             var response = ApiClients.INSTANCE.seenApi().seen(targetProfile.get().uuid(), targetProfile.get().name());
             if (response == null) {

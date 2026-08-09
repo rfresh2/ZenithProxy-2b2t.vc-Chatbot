@@ -28,7 +28,7 @@ public abstract class Cmd extends ModuleUtils {
         return defaultDateFormatter;
     }
 
-    record TablistProfileData(String name, UUID uuid) implements ProfileData { }
+    public record TablistProfileData(String name, UUID uuid) implements ProfileData { }
 
     public Optional<ProfileData> resolveProfileData(String targetName) {
         if (!ChatUtil.isValidPlayerName(targetName)) {
