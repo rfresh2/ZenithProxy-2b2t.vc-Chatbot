@@ -39,7 +39,8 @@ public class VcChatbotCommand extends Command {
                 "chatCooldown <ticks>",
                 "appendRandom on/off",
                 "responsePrefix on/off",
-                "responsePrefix set <prefix>"
+                "responsePrefix set <prefix>",
+                "responseRetry on/off"
             )
             .build();
     }
@@ -99,7 +100,12 @@ public class VcChatbotCommand extends Command {
                     PLUGIN_CONFIG.responsePrefix = getString(c, "prefix");
                     c.getSource().getEmbed()
                         .title("Response Prefix Set");
-                }))));
+                }))))
+            .then(literal("responseRetry").then(argument("toggle", toggle()).executes(c -> {
+                PLUGIN_CONFIG.responseRetry = getToggle(c, "toggle");
+                c.getSource().getEmbed()
+                    .title("Response Retry " + toggleStrCaps(PLUGIN_CONFIG.responseRetry));
+            })));
     }
 
     @Override
@@ -116,6 +122,7 @@ public class VcChatbotCommand extends Command {
             ))
             .addField("Append Random", toggleStr(PLUGIN_CONFIG.appendRandomSuffix))
             .addField("Response Prefix", PLUGIN_CONFIG.responsePrefixEnabled ? escape(PLUGIN_CONFIG.responsePrefix) : "(disabled)")
+            .addField("Response Retry", toggleStr(PLUGIN_CONFIG.responseRetry))
             .primaryColor();
     }
 

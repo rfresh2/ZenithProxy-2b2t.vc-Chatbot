@@ -4,11 +4,17 @@ import com.github.rfresh2.EventConsumer;
 import com.zenith.Proxy;
 import com.zenith.event.chat.PublicChatEvent;
 import com.zenith.event.chat.WhisperChatEvent;
+import com.zenith.event.client.ClientConfigurationEvent;
+import com.zenith.event.client.ClientDisconnectEvent;
+import com.zenith.event.client.ClientOnlineEvent;
+import com.zenith.event.client.ClientTickEvent;
 import com.zenith.module.api.Module;
 import com.zenith.util.ChatUtil;
 import com.zenith.util.Wait;
 import com.zenith.util.timer.Timer;
 import com.zenith.util.timer.Timers;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftPacket;
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundChatPacket;
@@ -17,8 +23,11 @@ import vc.bot.cmd.Cmd;
 import vc.bot.cmd.CmdRegistry;
 import vc.bot.util.RandomString;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Stream;
@@ -30,6 +39,7 @@ import static vc.bot.VcBotPlugin.PLUGIN_CONFIG;
 public class VcChatbotModule extends Module {
     private final ExecutorService cmdExecutor = Executors.newSingleThreadExecutor();
     private final Timer chatCooldownTimer = Timers.tickTimer();
+    private final Map<String, SentChat> sentChats = new ConcurrentHashMap<>();
 
     @Override
     public boolean enabledSetting() {
@@ -40,8 +50,78 @@ public class VcChatbotModule extends Module {
     public List<EventConsumer<?>> registerEvents() {
         return List.of(
             of(PublicChatEvent.class, this::onPublicChat),
-            of(WhisperChatEvent.class, this::onWhisper)
+            of(WhisperChatEvent.class, this::onWhisper),
+            of(PublicChatEvent.class, this::onPublicChatMuteDetect),
+            of(ClientOnlineEvent.class, e -> resetSentChats()),
+            of(ClientDisconnectEvent.class, e -> resetSentChats()),
+            of(ClientConfigurationEvent.Entered.class, e -> resetSentChats()),
+            of(ClientTickEvent.class, e -> muteDetectExec())
         );
+    }
+
+    @Override
+    public void onEnable() {
+        resetSentChats();
+    }
+
+    @Override
+    public void onDisable() {
+        resetSentChats();
+    }
+
+    private void resetSentChats() {
+        sentChats.clear();
+    }
+
+    private void onPublicChatMuteDetect(PublicChatEvent event) {
+        if (!PLUGIN_CONFIG.responseRetry) return;
+        var selfProfile = CACHE.getProfileCache().getProfile();
+        if (selfProfile == null) {
+            resetSentChats();
+            return;
+        }
+        if (!event.sender().getProfileId().equals(selfProfile.getId())) {
+            return;
+        }
+        sentChats.remove(event.message());
+    }
+
+    private void muteDetectExec() {
+        if (!PLUGIN_CONFIG.responseRetry) {
+            sentChats.clear();
+            return;
+        }
+        for (var it = sentChats.values().iterator(); it.hasNext(); ) {
+            final var sentChat = it.next();
+            if (sentChat.getAttempts() > 1) {
+                it.remove();
+                continue;
+            }
+            if (sentChat.getTime().isBefore(Instant.now().minusSeconds(5))) {
+                sentChat.setAttempts(sentChat.getAttempts() + 1);
+                sentChat.setTime(Instant.now());
+                String msg = sentChat.getMsg();
+                if (PLUGIN_CONFIG.appendRandomSuffix) {
+                    var randomStartIndex = msg.lastIndexOf('[');
+                    if (randomStartIndex != -1) {
+                        msg = msg.substring(0, randomStartIndex).trim();
+                        msg += " [" + RandomString.generate(6) + "]";
+                        sentChats.put(msg, new SentChat(msg, Instant.now(), sentChat.getAttempts()));
+                        it.remove();
+                    }
+                }
+                error("chat filtered, retrying: {}", msg);
+                sendClientPacketAsync(new ServerboundChatPacket(msg));
+            }
+        }
+    }
+
+    @Data
+    @AllArgsConstructor
+    static final class SentChat {
+        private final String msg;
+        private Instant time;
+        private int attempts;
     }
 
     interface CommandResponder {
@@ -118,6 +198,7 @@ public class VcChatbotModule extends Module {
             var responsePacket = responder.buildResponsePacket(result);
             if (responsePacket != null) {
                 info("{}", result);
+                sentChats.put(result, new SentChat(result, Instant.now(), 0));
                 sendClientPacketAsync(responsePacket);
             }
         } catch (IllegalArgumentException e) {

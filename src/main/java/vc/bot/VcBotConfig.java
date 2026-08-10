@@ -10,4 +10,5 @@ public class VcBotConfig {
     public boolean appendRandomSuffix = true;
     public boolean responsePrefixEnabled = true;
     public String responsePrefix = "> ";
+    public boolean responseRetry = true;
 }
