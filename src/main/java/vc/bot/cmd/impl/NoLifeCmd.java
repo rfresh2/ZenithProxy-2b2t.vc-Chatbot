@@ -31,7 +31,6 @@ public class NoLifeCmd extends Cmd {
             var ptSeconds = response.getPlaytimeSeconds();
             long secondsSinceFirstSeen = Duration.between(firstSeen, OffsetDateTime.now()).toSeconds();
             double proportionOnline = ptSeconds / (double) secondsSinceFirstSeen;
-            // todo: i think this is wrong
             Duration durationPerDay = Duration.ofSeconds((long) (Duration.ofDays(1).toSeconds() * proportionOnline));
             return "%s has wasted %.2f%% of their life since joining! Avg per day: %s".formatted(
                 targetProfile.get().name(),

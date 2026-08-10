@@ -1,3 +1,6 @@
+import org.gradle.internal.DefaultTaskExecutionRequest
+import java.lang.Boolean.parseBoolean
+
 plugins {
     id("zenithproxy.plugin.dev") version "1.0.1-SNAPSHOT"
     id("org.openapi.generator") version "7.24.0"
@@ -39,31 +42,18 @@ dependencies {
     zenithProxy("com.zenith:ZenithProxy:$mc-SNAPSHOT")
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")
     compileOnly("jakarta.annotation:jakarta.annotation-api:1.3.5")
-    shade("org.openapitools:jackson-databind-nullable:0.2.10")
-    /** to include dependencies into your plugin jar **/
-//    shade("com.github.ben-manes.caffeine:caffeine:3.2.0")
+}
+
+project.afterEvaluate {
+    if (parseBoolean(System.getProperty("idea.sync.active"))) {
+        val startParameter = project.gradle.startParameter
+        val taskRequests = startParameter.taskRequests.toMutableList()
+        taskRequests += DefaultTaskExecutionRequest(listOf(tasks.openApiGenerate.name))
+        startParameter.setTaskRequests(taskRequests)
+    }
 }
 
 tasks {
-    shadowJar {
-        /**
-         * relocate shaded dependencies to avoid conflicts with other plugins
-         * transitive dependencies should also be relocated or removed (with exclude)
-         * build and examine your plugin jar contents to check
-         * https://gradleup.com/shadow/configuration/relocation/
-         */
-//        val basePackage = "${project.group}.shadow"
-//        relocate("com.github.benmanes.caffeine", "$basePackage.caffeine")
-
-        /**
-         * remove unneeded transitive dependencies
-         * https://gradleup.com/shadow/configuration/dependencies/#filtering-dependencies
-         */
-//        dependencies {
-//            exclude(dependency(":error_prone_annotations:.*"))
-//            exclude(dependency(":jspecify:.*"))
-//        }
-    }
     withType(JavaCompile::class) {
         dependsOn(openApiGenerate)
     }
@@ -87,6 +77,9 @@ openApiGenerate {
     generateModelTests = false
     configOptions = mapOf(
         "dateLibrary" to "java8",
-        "useJackson3" to "true"
+        "useJackson3" to "true",
+        "useJspecify" to "true",
+        "openApiNullable" to "false",
+        "hideGenerationTimestamp" to "true"
     )
 }
