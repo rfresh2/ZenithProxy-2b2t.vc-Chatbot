@@ -54,7 +54,8 @@ public class TimeCmd extends Cmd {
         }
         var h = ((curTickTime / 1000L) + 6) % 24;
         var min = curTickTime % 1000L;
-        return "the time is currently %s:%s (%s ticks)".formatted(
+        return "it is currently %s : %s:%s (%s ticks)".formatted(
+            h >= 6 && h < 18 ? "day" : "night",
             h,
             min,
             curTickTime
