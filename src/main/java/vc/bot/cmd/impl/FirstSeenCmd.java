@@ -6,6 +6,8 @@ import vc.bot.api.ApiClients;
 import vc.bot.cmd.Cmd;
 import vc.bot.openapi.handler.ApiException;
 
+import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 public class FirstSeenCmd extends Cmd {
@@ -31,7 +33,12 @@ public class FirstSeenCmd extends Cmd {
             }
             var dateFmt = dateTimeFormatter()
                 .format(firstSeen);
-            return "%s was first seen on %s".formatted(targetProfile.get().name(), dateFmt);
+            var sinceNow = Duration.between(firstSeen, OffsetDateTime.now());
+            return "%s was first seen on %s - %s ago".formatted(
+                targetProfile.get().name(),
+                dateFmt,
+                formatDuration(sinceNow.toSeconds())
+            );
         } catch (ApiException e) {
             if (e.getCode() == 204) {
                 return noDataFoundMsg(targetProfile.get().name());
