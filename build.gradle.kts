@@ -40,7 +40,6 @@ repositories {
 
 dependencies {
     zenithProxy("com.zenith:ZenithProxy:$mc-SNAPSHOT")
-    compileOnly("com.google.code.findbugs:jsr305:3.0.2")
     compileOnly("jakarta.annotation:jakarta.annotation-api:1.3.5")
 }
 
