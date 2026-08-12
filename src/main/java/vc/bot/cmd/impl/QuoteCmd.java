@@ -32,14 +32,16 @@ public class QuoteCmd extends Cmd {
             var chat = response.getChats().get(ThreadLocalRandom.current().nextInt(0, response.getChats().size()));
             if (response.getPageCount() > 1) {
                 var randomPage = ThreadLocalRandom.current().nextInt(1, response.getPageCount() + 1);
-                try {
-                    var response2 = ApiClients.INSTANCE.chatsApi().chats(null, targetProfile.get().name(), targetProfile.get().uuid(), null, null, "desc", 100, randomPage);
-                    if (response2 != null && !response2.getChats().isEmpty()) {
-                        chat = response2.getChats().get(ThreadLocalRandom.current().nextInt(0, response2.getChats().size()));
-                    }
-                } catch (ApiException e) {
-                    if (e.getCode() != 204) {
-                        error("API error", e);
+                if (randomPage > 1) {
+                    try {
+                        var response2 = ApiClients.INSTANCE.chatsApi().chats(null, targetProfile.get().name(), targetProfile.get().uuid(), null, null, "desc", 100, randomPage);
+                        if (response2 != null && !response2.getChats().isEmpty()) {
+                            chat = response2.getChats().get(ThreadLocalRandom.current().nextInt(0, response2.getChats().size()));
+                        }
+                    } catch (ApiException e) {
+                        if (e.getCode() != 204) {
+                            error("API error", e);
+                        }
                     }
                 }
             }
