@@ -80,7 +80,7 @@ public abstract class Cmd extends ModuleUtils {
     }
 
     public String noPlayerFoundMsg(String input) {
-        return "Player not found";
+        return "No player with that name exists";
     }
 
     public String noDataFoundMsg() {
@@ -88,6 +88,6 @@ public abstract class Cmd extends ModuleUtils {
     }
 
     public String noDataFoundMsg(String player) {
-        return "No data found for %s".formatted(player);
+        return "No data found about %s".formatted(player);
     }
 }
