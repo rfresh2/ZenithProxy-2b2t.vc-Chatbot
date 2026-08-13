@@ -21,18 +21,32 @@ public class PlaytimeCmd extends Cmd {
             return noPlayerFoundMsg(targetName(sender, args));
         }
         try {
-            var response = ApiClients.INSTANCE.playtimeApi().playtime(targetProfile.get().uuid(), targetProfile.get().name());
+            var response = ApiClients.INSTANCE.statsApi().playerStats(targetProfile.get().uuid(), targetProfile.get().name());
             if (response == null) {
                 return noDataFoundMsg(targetProfile.get().name());
             }
-            if (response.getPlaytimeSeconds() == null) {
+            if (response.getPlaytimeSeconds() == null || response.getPlaytimeSecondsMonth() == null) {
                 return noDataFoundMsg(targetProfile.get().name());
             }
-            var durationStr = formatDuration(response.getPlaytimeSeconds());
-            return "%s has played for %s".formatted(
+            var part1 = "%s has played for %s".formatted(
                 targetProfile.get().name(),
-                durationStr
+                formatDuration(response.getPlaytimeSeconds())
             );
+            String part2;
+            if (response.getPlaytimeSeconds() == 0) {
+                part2 = "";
+            } else {
+                String durStr;
+                if (response.getPlaytimeSecondsMonth() == 0) {
+                    durStr = "none";
+                } else if (response.getPlaytimeSecondsMonth().equals(response.getPlaytimeSeconds())) {
+                    durStr = "all";
+                } else {
+                    durStr = formatDuration(response.getPlaytimeSecondsMonth());
+                }
+                part2 = " - with %s in the last 30d".formatted(durStr);
+            }
+            return part1 + part2;
         } catch (ApiException e) {
             if (e.getCode() == 204) {
                 return noDataFoundMsg(targetProfile.get().name());
