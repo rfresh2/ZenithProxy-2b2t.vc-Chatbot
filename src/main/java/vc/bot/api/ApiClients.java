@@ -6,7 +6,6 @@ import vc.bot.BuildConstants;
 import vc.bot.VcBotPlugin;
 import vc.bot.openapi.handler.*;
 
-import java.net.http.HttpClient;
 import java.time.Duration;
 
 import static com.zenith.Globals.CONFIG;
@@ -17,45 +16,33 @@ import static vc.bot.VcBotPlugin.PLUGIN_CONFIG;
 public class ApiClients {
     public static final ApiClients INSTANCE = new ApiClients();
 
-    private final DeathsApi deathsApi;
-    private final SeenApi seenApi;
-    private final ChatsApi chatsApi;
-    private final StatsApi statsApi;
-    private final PlaytimeApi playtimeApi;
-    private final PriorityPlayersApi priorityPlayersApi;
-    private final TabListApi tabListApi;
-    private final TimeApi timeApi;
-    private final BotsApi botsApi;
-
-    private ApiClients() {
-        var apiClient = apiClient();
-        deathsApi = new DeathsApi(apiClient);
-        seenApi = new SeenApi(apiClient);
-        chatsApi = new ChatsApi(apiClient);
-        statsApi = new StatsApi(apiClient);
-        playtimeApi = new PlaytimeApi(apiClient);
-        priorityPlayersApi = new PriorityPlayersApi(apiClient);
-        tabListApi = new TabListApi(apiClient);
-        timeApi = new TimeApi(apiClient);
-        botsApi = new BotsApi(apiClient);
+    {
+        Configuration.setDefaultApiClient(apiClient());
     }
 
-    ApiClient apiClient() {
-        return new ApiClient(
-            HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(5)),
-            ApiClient.createDefaultObjectMapper(),
-            "https://api.2b2t.vc")
+    private final DeathsApi deathsApi = new DeathsApi();
+    private final SeenApi seenApi = new SeenApi();
+    private final ChatsApi chatsApi = new ChatsApi();
+    private final StatsApi statsApi = new StatsApi();
+    private final PlaytimeApi playtimeApi = new PlaytimeApi();
+    private final PriorityPlayersApi priorityPlayersApi = new PriorityPlayersApi();
+    private final TabListApi tabListApi = new TabListApi();
+    private final TimeApi timeApi = new TimeApi();
+    private final BotsApi botsApi = new BotsApi();
+
+    static ApiClient apiClient() {
+        return new ApiClient()
+            .setConnectTimeout(Duration.ofSeconds(5))
             .setReadTimeout(Duration.ofSeconds(30))
-            .setRequestInterceptor(b -> {
+            .setRequestInterceptor(req -> {
                 var apiKey = PLUGIN_CONFIG.apiKey;
                 if (!apiKey.isEmpty()) {
-                    b.header("X-API-Key", apiKey);
+                    req.header("X-API-Key", apiKey);
                 }
-                b.header("User-Agent", "ZenithProxy-2b2t.vc-Chatbot/%s/%s".formatted(CONFIG.authentication.username, BuildConstants.VERSION));
+                req.header("User-Agent", "ZenithProxy-2b2t.vc-Chatbot/%s/%s".formatted(CONFIG.authentication.username, BuildConstants.VERSION));
             })
-            .setResponseInterceptor(r -> {
-                VcBotPlugin.LOG.info("{} -> {}", r.uri().toString(), r.statusCode());
+            .setResponseInterceptor(res -> {
+                VcBotPlugin.LOG.info("{} -> {}", res.uri().toString(), res.statusCode());
             });
     }
 }
