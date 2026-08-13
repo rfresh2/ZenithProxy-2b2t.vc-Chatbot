@@ -21,7 +21,7 @@ public class PrioSlotsCmd extends Cmd {
             if (response == null) {
                 return noDataFoundMsg();
             }
-            return "Non-prio: %s - Prio: %s".formatted(
+            return "Non-prio slots: %s - Prio slots: %s".formatted(
                 response.getNonPrioCount(),
                 response.getPrioCount()
             );

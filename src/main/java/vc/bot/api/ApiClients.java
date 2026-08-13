@@ -25,6 +25,7 @@ public class ApiClients {
     private final PriorityPlayersApi priorityPlayersApi;
     private final TabListApi tabListApi;
     private final TimeApi timeApi;
+    private final BotsApi botsApi;
 
     private ApiClients() {
         var apiClient = apiClient();
@@ -36,6 +37,7 @@ public class ApiClients {
         priorityPlayersApi = new PriorityPlayersApi(apiClient);
         tabListApi = new TabListApi(apiClient);
         timeApi = new TimeApi(apiClient);
+        botsApi = new BotsApi(apiClient);
     }
 
     ApiClient apiClient() {

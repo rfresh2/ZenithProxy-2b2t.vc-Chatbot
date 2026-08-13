@@ -6,6 +6,7 @@ How to install ZenithProxy plugins: https://wiki.2b2t.vc/Plugins/
 
 ## Commands
 
+* `!bot` / `!bots` / `!botcount`
 * `!coords` / `!locate`
 * `!firstdeath` / `!fd`
 * `!firstkill` / `!fk`
