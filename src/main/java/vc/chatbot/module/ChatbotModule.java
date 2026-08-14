@@ -34,6 +34,7 @@ import java.util.stream.Stream;
 
 import static com.github.rfresh2.EventConsumer.of;
 import static com.zenith.Globals.CACHE;
+import static com.zenith.Globals.PLAYER_LISTS;
 import static vc.chatbot.ChatbotPlugin.PLUGIN_CONFIG;
 
 public class ChatbotModule extends Module {
@@ -140,6 +141,9 @@ public class ChatbotModule extends Module {
     }
 
     private void handleIncoming(String input, PlayerListEntry sender, CommandResponder responder) {
+        if (PLAYER_LISTS.getIgnoreList().contains(sender.getProfileId())) {
+            return;
+        }
         input = input.trim();
         if (!PLUGIN_CONFIG.prefix.contains(">")) {
             // chop off any greentext prefix
