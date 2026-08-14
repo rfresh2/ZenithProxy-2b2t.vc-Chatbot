@@ -21,6 +21,7 @@ zenithProxyPlugin {
         "mc_version" to mc,
         "plugin_id" to pluginId,
         "maven_group" to group as String,
+        "plugin_name" to project.name,
     )
     // the minimum supported java version for users of your plugin
     javaReleaseVersion = JavaLanguageVersion.of(21)
