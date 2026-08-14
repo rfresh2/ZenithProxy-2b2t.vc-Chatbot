@@ -2,9 +2,9 @@ package vc.chatbot.api;
 
 import lombok.Getter;
 import lombok.experimental.Accessors;
-import vc.bot.openapi.handler.*;
 import vc.chatbot.BuildConstants;
 import vc.chatbot.ChatbotPlugin;
+import vc.chatbot.openapi.handler.*;
 
 import java.time.Duration;
 

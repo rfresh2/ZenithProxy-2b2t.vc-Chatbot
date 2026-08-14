@@ -6,7 +6,7 @@ import com.zenith.module.api.ModuleUtils;
 import com.zenith.util.ChatUtil;
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.jspecify.annotations.Nullable;
-import vc.bot.openapi.handler.ApiException;
+import vc.chatbot.openapi.handler.ApiException;
 
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;

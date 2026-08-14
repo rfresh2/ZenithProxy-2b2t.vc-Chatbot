@@ -2,8 +2,8 @@ package vc.chatbot.cmd.impl;
 
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.jspecify.annotations.Nullable;
-import vc.bot.openapi.handler.ApiException;
 import vc.chatbot.cmd.Cmd;
+import vc.chatbot.openapi.handler.ApiException;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;

@@ -3,8 +3,8 @@ package vc.chatbot.cmd.impl;
 import com.zenith.feature.queue.Queue;
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.jspecify.annotations.Nullable;
-import vc.bot.openapi.handler.ApiException;
 import vc.chatbot.cmd.Cmd;
+import vc.chatbot.openapi.handler.ApiException;
 
 import java.util.List;
 

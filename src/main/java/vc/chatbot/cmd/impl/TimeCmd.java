@@ -4,9 +4,9 @@ import com.zenith.feature.player.World;
 import com.zenith.mc.dimension.DimensionRegistry;
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.jspecify.annotations.Nullable;
-import vc.bot.openapi.handler.ApiException;
 import vc.chatbot.api.ApiClients;
 import vc.chatbot.cmd.Cmd;
+import vc.chatbot.openapi.handler.ApiException;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
