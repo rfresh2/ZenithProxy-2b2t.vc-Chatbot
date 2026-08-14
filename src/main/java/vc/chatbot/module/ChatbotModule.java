@@ -11,6 +11,7 @@ import com.zenith.event.client.ClientTickEvent;
 import com.zenith.module.api.Module;
 import com.zenith.util.ChatUtil;
 import com.zenith.util.Wait;
+import com.zenith.util.math.MathHelper;
 import com.zenith.util.timer.Timer;
 import com.zenith.util.timer.Timers;
 import lombok.AllArgsConstructor;
@@ -93,12 +94,14 @@ public class ChatbotModule extends Module {
             return;
         }
         for (var it = sentChats.values().iterator(); it.hasNext(); ) {
-            final var sentChat = it.next();
+            var sentChat = it.next();
             if (sentChat.getAttempts() > 1) {
                 it.remove();
                 continue;
             }
-            if (sentChat.getTime().isBefore(Instant.now().minusSeconds(5))) {
+            var retryTimeoutTicks = Math.max(5 * 20, PLUGIN_CONFIG.chatCooldownTicks + 20);
+            var retryTimeoutSeconds = MathHelper.ceilI(retryTimeoutTicks / 20.0);
+            if (sentChat.getTime().isBefore(Instant.now().minusSeconds(retryTimeoutSeconds))) {
                 sentChat.setAttempts(sentChat.getAttempts() + 1);
                 sentChat.setTime(Instant.now());
                 String msg = sentChat.getMsg();
@@ -107,12 +110,19 @@ public class ChatbotModule extends Module {
                     if (randomStartIndex != -1) {
                         msg = msg.substring(0, randomStartIndex).trim();
                         msg += " [" + RandomString.generate(6) + "]";
-                        sentChats.put(msg, new SentChat(msg, Instant.now(), sentChat.getAttempts()));
+                        sentChat = new SentChat(msg, Instant.now(), sentChat.getAttempts());
+                        sentChats.put(msg, sentChat);
                         it.remove();
                     }
                 }
                 error("chat filtered, retrying: {}", msg);
-                sendClientPacketAsync(new ServerboundChatPacket(msg));
+                final var finalMsg = msg;
+                final var finalSentChat = sentChat;
+                cmdExecutor.execute(() -> {
+                    Wait.waitUntil(() -> chatCooldownTimer.tick(PLUGIN_CONFIG.chatCooldownTicks), (PLUGIN_CONFIG.chatCooldownTicks / 20) + 1);
+                    finalSentChat.setTime(Instant.now());
+                    sendClientPacketAsync(new ServerboundChatPacket(finalMsg));
+                });
             }
         }
     }
