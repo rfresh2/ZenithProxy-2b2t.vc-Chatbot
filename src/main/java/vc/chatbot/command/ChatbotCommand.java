@@ -34,6 +34,7 @@ public class ChatbotCommand extends Command {
                 "publicChat on/off",
                 "whispers on/off",
                 "prefix <prefix>",
+                "ignoreSelf on/off",
                 "apiKey set <key>",
                 "apiKey clear",
                 "chatCooldown <ticks>",
@@ -69,6 +70,11 @@ public class ChatbotCommand extends Command {
                 PLUGIN_CONFIG.prefix = getString(c, "prefix");
                 c.getSource().getEmbed()
                     .title("Prefix Set");
+            })))
+            .then(literal("ignoreSelf").then(argument("toggle", toggle()).executes(c -> {
+                PLUGIN_CONFIG.ignoreSelf = getToggle(c, "toggle");
+                c.getSource().getEmbed()
+                    .title("Ignore Self " + toggleStrCaps(PLUGIN_CONFIG.ignoreSelf));
             })))
             .then(literal("apiKey")
                 .then(literal("clear").executes(c -> {
@@ -117,6 +123,7 @@ public class ChatbotCommand extends Command {
             .addField("Public Chat", toggleStr(PLUGIN_CONFIG.publicChat))
             .addField("Whispers", toggleStr(PLUGIN_CONFIG.whispers))
             .addField("Prefix", "`" + escape(PLUGIN_CONFIG.prefix) + "`")
+            .addField("Ignore Self", toggleStr(PLUGIN_CONFIG.ignoreSelf))
             .addField("API Key", PLUGIN_CONFIG.apiKey.isEmpty() ? "(none)" : escape(PLUGIN_CONFIG.apiKey))
             .addField("Chat Cooldown", "%s ticks (%.2f seconds)".formatted(
                 PLUGIN_CONFIG.chatCooldownTicks,

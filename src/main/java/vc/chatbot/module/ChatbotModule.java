@@ -195,6 +195,11 @@ public class ChatbotModule extends Module {
                 info("Sender is offline, ignoring cmd {}", msg);
                 return;
             }
+            var selfProfile = CACHE.getProfileCache().getProfile();
+            if (PLUGIN_CONFIG.ignoreSelf && selfProfile != null && sender.getProfileId().equals(selfProfile.getId())) {
+                info("Ignoring self cmd {}", msg);
+                return;
+            }
             if (!isEnabled()) return;
             var result = cmd.handle(sender, argsList); // api call, will block for substantial time
             if (result == null) {

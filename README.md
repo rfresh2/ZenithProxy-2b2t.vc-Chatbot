@@ -32,6 +32,7 @@ How to install ZenithProxy plugins: https://wiki.2b2t.vc/Plugins/
 * `chatbot publicChat on/off`
 * `chatbot whispers on/off`
 * `chatbot prefix <prefix>`
+* `chatbot ignoreSelf on/off`
 * `chatbot apiKey set <key>` -> optional, but can help avoid 2b2t.vc API rate limits
 * `chatbot apiKey clear`
 * `chatbot chatCooldown <ticks>`
