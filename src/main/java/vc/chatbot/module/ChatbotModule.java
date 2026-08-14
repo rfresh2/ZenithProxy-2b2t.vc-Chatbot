@@ -54,6 +54,7 @@ public class ChatbotModule extends Module {
             of(PublicChatEvent.class, this::onPublicChat),
             of(WhisperChatEvent.class, this::onWhisper),
             of(PublicChatEvent.class, this::onPublicChatMuteDetect),
+            of(WhisperChatEvent.class, this::onWhisperChatMuteDetect),
             of(ClientOnlineEvent.class, e -> resetSentChats()),
             of(ClientDisconnectEvent.class, e -> resetSentChats()),
             of(ClientConfigurationEvent.Entered.class, e -> resetSentChats()),
@@ -85,7 +86,26 @@ public class ChatbotModule extends Module {
         if (!event.sender().getProfileId().equals(selfProfile.getId())) {
             return;
         }
-        sentChats.remove(event.message());
+        var sentChat = sentChats.get(event.message());
+        if (sentChat != null && sentChat.getResponder() instanceof PublicChatResponder) {
+            sentChats.remove(event.message());
+        }
+    }
+
+    private void onWhisperChatMuteDetect(WhisperChatEvent event) {
+        if (!PLUGIN_CONFIG.responseRetry) return;
+        var selfProfile = CACHE.getProfileCache().getProfile();
+        if (selfProfile == null) {
+            resetSentChats();
+            return;
+        }
+        if (!event.sender().getProfileId().equals(selfProfile.getId())) {
+            return;
+        }
+        var sentChat = sentChats.get(event.message());
+        if (sentChat != null && sentChat.getResponder() instanceof WhisperChatResponder) {
+            sentChats.remove(event.message());
+        }
     }
 
     private void muteDetectExec() {
@@ -110,7 +130,7 @@ public class ChatbotModule extends Module {
                     if (randomStartIndex != -1) {
                         msg = msg.substring(0, randomStartIndex).trim();
                         msg += " [" + RandomString.generate(6) + "]";
-                        sentChat = new SentChat(msg, Instant.now(), sentChat.getAttempts());
+                        sentChat = new SentChat(sentChat.getResponder(), msg, sentChat.getSender(), Instant.now(), sentChat.getAttempts());
                         sentChats.put(msg, sentChat);
                         it.remove();
                     }
@@ -120,8 +140,11 @@ public class ChatbotModule extends Module {
                 final var finalSentChat = sentChat;
                 cmdExecutor.execute(() -> {
                     Wait.waitUntil(() -> chatCooldownTimer.tick(PLUGIN_CONFIG.chatCooldownTicks), (PLUGIN_CONFIG.chatCooldownTicks / 20) + 1);
-                    finalSentChat.setTime(Instant.now());
-                    sendClientPacketAsync(new ServerboundChatPacket(finalMsg));
+                    var packet = finalSentChat.getResponder().buildResponsePacket(finalSentChat.getSender(), finalMsg);
+                    if (packet != null) {
+                        finalSentChat.setTime(Instant.now());
+                        sendClientPacketAsync(packet);
+                    }
                 });
             }
         }
@@ -130,24 +153,42 @@ public class ChatbotModule extends Module {
     @Data
     @AllArgsConstructor
     static final class SentChat {
+        private final CommandResponder responder;
         private final String msg;
+        private final PlayerListEntry sender;
         private Instant time;
         private int attempts;
     }
 
-    interface CommandResponder {
-        @Nullable MinecraftPacket buildResponsePacket(String response);
+    sealed interface CommandResponder permits PublicChatResponder, WhisperChatResponder {
+        @Nullable MinecraftPacket buildResponsePacket(PlayerListEntry sender, String response);
+    }
+
+    record PublicChatResponder() implements CommandResponder {
+        static final PublicChatResponder INSTANCE = new PublicChatResponder();
+        @Override
+        public @Nullable MinecraftPacket buildResponsePacket(PlayerListEntry sender, String response) {
+            return new ServerboundChatPacket(response);
+        }
+    }
+
+    record WhisperChatResponder() implements CommandResponder {
+        static final WhisperChatResponder INSTANCE = new WhisperChatResponder();
+        @Override
+        public @Nullable MinecraftPacket buildResponsePacket(PlayerListEntry sender, String response) {
+            return ChatUtil.getWhisperChatPacket(sender.getName(), response);
+        }
     }
 
     void onPublicChat(PublicChatEvent event) {
         if (!PLUGIN_CONFIG.publicChat) return;
-        handleIncoming(event.message(), event.sender(), ServerboundChatPacket::new);
+        handleIncoming(event.message(), event.sender(), PublicChatResponder.INSTANCE);
     }
 
     private void onWhisper(WhisperChatEvent event) {
         if (!PLUGIN_CONFIG.whispers) return;
         if (event.outgoing()) return;
-        handleIncoming(event.message(), event.sender(), r -> ChatUtil.getWhisperChatPacket(event.sender().getName(), r));
+        handleIncoming(event.message(), event.sender(), WhisperChatResponder.INSTANCE);
     }
 
     private void handleIncoming(String input, PlayerListEntry sender, CommandResponder responder) {
@@ -214,10 +255,10 @@ public class ChatbotModule extends Module {
             if (PLUGIN_CONFIG.responseRandomSuffix) {
                 result += " [" + RandomString.generate(6) + "]";
             }
-            var responsePacket = responder.buildResponsePacket(result);
+            var responsePacket = responder.buildResponsePacket(sender, result);
             if (responsePacket != null) {
                 info("{}", result);
-                sentChats.put(result, new SentChat(result, Instant.now(), 0));
+                sentChats.put(result, new SentChat(responder, result, sender, Instant.now(), 0));
                 sendClientPacketAsync(responsePacket);
             }
         } catch (IllegalArgumentException e) {
