@@ -12,4 +12,5 @@ public class ChatbotConfig {
     public boolean responsePrefixEnabled = true;
     public String responsePrefix = "> ";
     public boolean responseRetry = true;
+    public int responseMaxRetryAttempts = 1;
 }

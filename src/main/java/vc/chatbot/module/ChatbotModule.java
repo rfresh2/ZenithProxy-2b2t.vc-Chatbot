@@ -115,7 +115,7 @@ public class ChatbotModule extends Module {
         }
         for (var it = sentChats.values().iterator(); it.hasNext(); ) {
             var sentChat = it.next();
-            if (sentChat.getAttempts() > 1) {
+            if (sentChat.getAttempts() >= PLUGIN_CONFIG.responseMaxRetryAttempts) {
                 it.remove();
                 continue;
             }

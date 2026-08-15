@@ -7,6 +7,8 @@ import com.zenith.command.api.CommandContext;
 import com.zenith.command.api.CommandUsage;
 import vc.chatbot.module.ChatbotModule;
 
+import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 import static com.mojang.brigadier.arguments.StringArgumentType.string;
 import static com.zenith.Globals.MODULE;
 import static com.zenith.command.brigadier.CustomStringArgumentType.getString;
@@ -41,7 +43,8 @@ public class ChatbotCommand extends Command {
                 "response randomSuffix on/off",
                 "response prefix on/off",
                 "response prefix set <prefix>",
-                "response retry on/off"
+                "response retry on/off",
+                "response retry attempts <attempts>"
             )
             .aliases("vc")
             .build();
@@ -109,11 +112,17 @@ public class ChatbotCommand extends Command {
                         c.getSource().getEmbed()
                             .title("Response Prefix Set");
                     }))))
-                .then(literal("retry").then(argument("toggle", toggle()).executes(c -> {
-                    PLUGIN_CONFIG.responseRetry = getToggle(c, "toggle");
-                    c.getSource().getEmbed()
-                        .title("Response Retry " + toggleStrCaps(PLUGIN_CONFIG.responseRetry));
-                }))));
+                .then(literal("retry")
+                    .then(argument("toggle", toggle()).executes(c -> {
+                        PLUGIN_CONFIG.responseRetry = getToggle(c, "toggle");
+                        c.getSource().getEmbed()
+                            .title("Response Retry " + toggleStrCaps(PLUGIN_CONFIG.responseRetry));
+                    }))
+                    .then(literal("attempts").then(argument("attempts", integer()).executes(c -> {
+                        PLUGIN_CONFIG.responseMaxRetryAttempts = getInteger(c, "attempts");
+                        c.getSource().getEmbed()
+                            .title("Response Retry Attempts Set");
+                    })))));
     }
 
     @Override
@@ -132,6 +141,7 @@ public class ChatbotCommand extends Command {
             .addField("Response Random Suffix", toggleStr(PLUGIN_CONFIG.responseRandomSuffix))
             .addField("Response Prefix", PLUGIN_CONFIG.responsePrefixEnabled ? "`" + escape(PLUGIN_CONFIG.responsePrefix) + "`" : "(disabled)")
             .addField("Response Retry", toggleStr(PLUGIN_CONFIG.responseRetry))
+            .addField("Response Retry Attempts", PLUGIN_CONFIG.responseMaxRetryAttempts)
             .primaryColor();
     }
 

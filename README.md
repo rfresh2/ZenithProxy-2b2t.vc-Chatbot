@@ -40,6 +40,7 @@ How to install ZenithProxy plugins: https://wiki.2b2t.vc/Plugins/
 * `chatbot response prefix on/off`
 * `chatbot response prefix set <prefix>` -> default: "> " (green text)
 * `chatbot response retry on/off` -> retries if 2b2t filters the chat
+* `chatbot response retry attempts <attempts>`
 
 ### FAQ
 
