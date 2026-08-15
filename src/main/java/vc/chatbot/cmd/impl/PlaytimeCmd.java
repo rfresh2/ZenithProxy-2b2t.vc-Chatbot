@@ -28,6 +28,9 @@ public class PlaytimeCmd extends Cmd {
             if (response.getPlaytimeSeconds() == null || response.getPlaytimeSecondsMonth() == null) {
                 return noDataFoundMsg(targetProfile.get().name());
             }
+            if (response.getPlaytimeSeconds() == 0) {
+                return "%s has never played".formatted(targetProfile.get().name());
+            }
             var part1 = "%s has played for %s".formatted(
                 targetProfile.get().name(),
                 formatDuration(response.getPlaytimeSeconds())
