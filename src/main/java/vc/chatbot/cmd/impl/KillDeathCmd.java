@@ -36,9 +36,6 @@ public class KillDeathCmd extends Cmd {
                     : response.getKillCount() / (double) response.getDeathCount()
             );
         } catch (ApiException e) {
-            if (e.getCode() == 204) {
-                return noDataFoundMsg(targetProfile.get().name());
-            }
             error("API error", e);
             return null;
         }

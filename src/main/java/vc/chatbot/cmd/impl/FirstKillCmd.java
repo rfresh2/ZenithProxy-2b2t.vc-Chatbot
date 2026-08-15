@@ -21,21 +21,16 @@ public class FirstKillCmd extends Cmd {
             return noPlayerFoundMsg(targetName(sender, args));
         }
         try {
-            var response = ApiClients.INSTANCE.deathsApi().kills(targetProfile.get().uuid(), targetProfile.get().name(), null, null, "asc", 1, null);
-            if (response == null) {
-                return noDataFoundMsg(targetProfile.get().name());
+            var response = ApiClients.INSTANCE.deathsApi().killsWithHttpInfo(targetProfile.get().uuid(), targetProfile.get().name(), null, null, "asc", 1, null);
+            if (response.getStatusCode() == 204 || response.getData() == null || response.getData().getKills().isEmpty()) {
+                return "%s has never killed anyone".formatted(targetProfile.get().name());
             }
-            if (response.getKills().isEmpty()) {
-                return noDataFoundMsg(targetProfile.get().name());
-            }
+            var firstKill = response.getData().getKills().getFirst();
             return "[%s] %s".formatted(
-                dateTimeFormatter().format(response.getKills().getFirst().getTime()),
-                response.getKills().getFirst().getDeathMessage()
+                firstKill.getTime(),
+                firstKill.getDeathMessage()
             );
         } catch (ApiException e) {
-            if (e.getCode() == 204) {
-                return noDataFoundMsg(targetProfile.get().name());
-            }
             error("API error", e);
             return null;
         }

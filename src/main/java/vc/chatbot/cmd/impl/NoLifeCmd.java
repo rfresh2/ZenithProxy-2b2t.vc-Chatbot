@@ -38,9 +38,6 @@ public class NoLifeCmd extends Cmd {
                 formatDuration(durationPerDay.toSeconds())
             );
         } catch (ApiException e) {
-            if (e.getCode() == 204) {
-                return noDataFoundMsg(targetProfile.get().name());
-            }
             error("API error", e);
             return null;
         }

@@ -21,23 +21,17 @@ public class FirstWordsCmd extends Cmd {
             return noPlayerFoundMsg(targetName(sender, args));
         }
         try {
-            var response = ApiClients.INSTANCE.chatsApi().chats(null, targetProfile.get().name(), targetProfile.get().uuid(), null, null, "asc", 1, 0);
-            if (response == null) {
-                return noDataFoundMsg(targetProfile.get().name());
+            var response = ApiClients.INSTANCE.chatsApi().chatsWithHttpInfo(null, targetProfile.get().name(), targetProfile.get().uuid(), null, null, "asc", 1, 0);
+            if (response.getStatusCode() == 204 || response.getData() == null || response.getData().getChats().isEmpty()) {
+                return "%s has never said anything";
             }
-            if (response.getChats().isEmpty()) {
-                return noDataFoundMsg(targetProfile.get().name());
-            }
-            var chat = response.getChats().getFirst();
+            var chat = response.getData().getChats().getFirst();
             return "[%s] <%s> %s".formatted(
                 dateTimeFormatter().format(chat.getTime()),
                 chat.getPlayerName(),
                 chat.getChat()
             );
         } catch (ApiException e) {
-            if (e.getCode() == 204) {
-                return noDataFoundMsg(targetProfile.get().name());
-            }
             error("API error", e);
             return null;
         }

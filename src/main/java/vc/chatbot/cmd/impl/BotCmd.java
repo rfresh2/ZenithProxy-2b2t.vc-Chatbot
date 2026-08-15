@@ -32,9 +32,6 @@ public class BotCmd extends Cmd {
                 monthlyBotCount
             );
         } catch (ApiException e) {
-            if (e.getCode() == 204) {
-                return noDataFoundMsg();
-            }
             error("API error", e);
             return null;
         }

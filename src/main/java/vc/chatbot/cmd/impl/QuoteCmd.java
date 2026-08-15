@@ -22,16 +22,13 @@ public class QuoteCmd extends Cmd {
             return noPlayerFoundMsg(targetName(sender, args));
         }
         try {
-            var response = ApiClients.INSTANCE.chatsApi().chats(null, targetProfile.get().name(), targetProfile.get().uuid(), null, null, "desc", 100, null);
-            if (response == null) {
-                return noDataFoundMsg(targetProfile.get().name());
+            var response = ApiClients.INSTANCE.chatsApi().chatsWithHttpInfo(null, targetProfile.get().name(), targetProfile.get().uuid(), null, null, "desc", 100, null);
+            if (response.getStatusCode() == 204 || response.getData() == null || response.getData().getChats().isEmpty()) {
+                return "%s has never said anything";
             }
-            if (response.getChats().isEmpty()) {
-                return noDataFoundMsg(targetProfile.get().name());
-            }
-            var chat = response.getChats().get(ThreadLocalRandom.current().nextInt(0, response.getChats().size()));
-            if (response.getPageCount() > 1) {
-                var randomPage = ThreadLocalRandom.current().nextInt(1, response.getPageCount() + 1);
+            var chat = response.getData().getChats().get(ThreadLocalRandom.current().nextInt(0, response.getData().getChats().size()));
+            if (response.getData().getPageCount() > 1) {
+                var randomPage = ThreadLocalRandom.current().nextInt(1, response.getData().getPageCount() + 1);
                 if (randomPage > 1) {
                     try {
                         var response2 = ApiClients.INSTANCE.chatsApi().chats(null, targetProfile.get().name(), targetProfile.get().uuid(), null, null, "desc", 100, randomPage);
@@ -50,9 +47,6 @@ public class QuoteCmd extends Cmd {
                 chat.getPlayerName(),
                 chat.getChat());
         } catch (ApiException e) {
-            if (e.getCode() == 204) {
-                return noDataFoundMsg(targetProfile.get().name());
-            }
             error("API error", e);
             return null;
         }

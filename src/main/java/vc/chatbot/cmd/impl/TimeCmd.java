@@ -42,9 +42,6 @@ public class TimeCmd extends Cmd {
                 var ticksLag = timeLag.toMillis() / 50L;
                 curTickTime = (worldTime + ticksLag) % 24000L;
             } catch (ApiException e) {
-                if (e.getCode() == 204) {
-                    return noDataFoundMsg();
-                }
                 error("API error", e);
                 return null;
             }

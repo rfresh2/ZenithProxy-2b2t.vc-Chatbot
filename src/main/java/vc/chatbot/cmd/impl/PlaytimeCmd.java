@@ -48,9 +48,6 @@ public class PlaytimeCmd extends Cmd {
             }
             return part1 + part2;
         } catch (ApiException e) {
-            if (e.getCode() == 204) {
-                return noDataFoundMsg(targetProfile.get().name());
-            }
             error("API error", e);
             return null;
         }

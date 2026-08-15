@@ -23,14 +23,11 @@ public class FirstSeenCmd extends Cmd {
             return noPlayerFoundMsg(targetName(sender, args));
         }
         try {
-            var response = ApiClients.INSTANCE.seenApi().seen(targetProfile.get().uuid(), targetProfile.get().name());
-            if (response == null) {
-                return noDataFoundMsg(targetProfile.get().name());
+            var response = ApiClients.INSTANCE.seenApi().seenWithHttpInfo(targetProfile.get().uuid(), targetProfile.get().name());
+            if (response.getStatusCode() == 204 || response.getData() == null) {
+                return "%s has never been seen on 2b2t".formatted(targetProfile.get().name());
             }
-            var firstSeen = response.getFirstSeen();
-            if (firstSeen == null) {
-                return noDataFoundMsg(targetProfile.get().name());
-            }
+            var firstSeen = response.getData().getFirstSeen();
             var dateFmt = dateTimeFormatter()
                 .format(firstSeen);
             var sinceNow = Duration.between(firstSeen, OffsetDateTime.now());

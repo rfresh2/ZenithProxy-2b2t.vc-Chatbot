@@ -26,23 +26,17 @@ public class LastSeenCmd extends Cmd {
             return "%s is online now".formatted(targetProfile.get().name());
         }
         try {
-            var response = ApiClients.INSTANCE.seenApi().seen(targetProfile.get().uuid(), targetProfile.get().name());
-            if (response == null) {
-                return noDataFoundMsg(targetProfile.get().name());
+            var response = ApiClients.INSTANCE.seenApi().seenWithHttpInfo(targetProfile.get().uuid(), targetProfile.get().name());
+            if (response.getStatusCode() == 204 || response.getData() == null) {
+                return "%s has never been seen on 2b2t".formatted(targetProfile.get().name());
             }
-            if (response.getLastSeen() == null) {
-                return noDataFoundMsg(targetProfile.get().name());
-            }
-            var sinceNow = Duration.between(response.getLastSeen(), OffsetDateTime.now());
+            var sinceNow = Duration.between(response.getData().getLastSeen(), OffsetDateTime.now());
             return "%s was last seen on %s - %s ago".formatted(
                 targetProfile.get().name(),
-                dateTimeFormatter().format(response.getLastSeen()),
+                dateTimeFormatter().format(response.getData().getLastSeen()),
                 formatDuration(sinceNow.toSeconds())
             );
         } catch (ApiException e) {
-            if (e.getCode() == 204) {
-                return noDataFoundMsg(targetProfile.get().name());
-            }
             error("API error", e);
             return null;
         }

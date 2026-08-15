@@ -26,9 +26,6 @@ public class PrioSlotsCmd extends Cmd {
                 response.getPrioCount()
             );
         } catch (ApiException e) {
-            if (e.getCode() == 204) {
-                return noDataFoundMsg();
-            }
             error("API error", e);
             return null;
         }
