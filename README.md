@@ -4,6 +4,8 @@ In-game 2b2t chatbot, powered by https://api.2b2t.vc
 
 How to install ZenithProxy plugins: https://wiki.2b2t.vc/Plugins/
 
+![example](assets/example1.png)
+
 ## Chatbot Commands
 
 * `!bot` / `!bots` / `!botcount`
