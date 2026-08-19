@@ -101,7 +101,7 @@ public abstract class Cmd extends ModuleUtils {
     }
 
     public String noPlayerFoundMsg(String input) {
-        return "No player with that name exists";
+        return "No player currently exists with that name. Check NameMC/Laby for name changes";
     }
 
     public String noDataFoundMsg() {
@@ -109,6 +109,6 @@ public abstract class Cmd extends ModuleUtils {
     }
 
     public String noDataFoundMsg(String player) {
-        return "No data found about %s".formatted(player);
+        return "No data found about %s. Check NameMC/Laby for name changes".formatted(player);
     }
 }
