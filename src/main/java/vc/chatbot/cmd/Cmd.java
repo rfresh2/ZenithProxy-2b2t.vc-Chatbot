@@ -8,8 +8,11 @@ import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.jspecify.annotations.Nullable;
 import vc.chatbot.openapi.handler.ApiException;
 
+import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -57,20 +60,38 @@ public abstract class Cmd extends ModuleUtils {
         var secondsInMinute = 60L;
         var secondsInHour = secondsInMinute * 60L;
         var secondsInDay = secondsInHour * 24L;
-        var secondsInMonth = secondsInDay * 30L; // assuming 30 days per month
-        var secondsInYear = secondsInMonth * 12L;
+        var secondsInMonth = (long) (secondsInDay * 30.436875);
+        var secondsInYear = (long) (secondsInDay * 365.2425);
 
         var years = durationInSeconds / secondsInYear;
         var months = (durationInSeconds % secondsInYear) / secondsInMonth;
         var days = (durationInSeconds % secondsInMonth) / secondsInDay;
         var hours = (durationInSeconds % secondsInDay) / secondsInHour;
+        return formatDuration(years, months, days, hours, durationInSeconds);
+    }
+
+    public String formatDuration(OffsetDateTime start, OffsetDateTime end) {
+        var cursor = start;
+        var years = ChronoUnit.YEARS.between(cursor, end);
+        cursor = cursor.plusYears(years);
+        var months = ChronoUnit.MONTHS.between(cursor, end);
+        cursor = cursor.plusMonths(months);
+        var days = ChronoUnit.DAYS.between(cursor, end);
+        cursor = cursor.plusDays(days);
+        var hours = ChronoUnit.HOURS.between(cursor, end);
+        cursor = cursor.plusHours(hours);
+        var remainingSeconds = Duration.between(cursor, end).toSeconds();
+        return formatDuration(years, months, days, hours, remainingSeconds);
+    }
+
+    private String formatDuration(long years, long months, long days, long hours, long durationInSeconds) {
         List<String> entries = new ArrayList<>(4);
         if (years > 0) entries.add(years + "y");
         if (months > 0) entries.add(months + "mo");
         if (days > 0) entries.add(days + "d");
         if (hours > 0) entries.add(hours + "h");
         if (entries.isEmpty()) {
-            var minutes = (double) durationInSeconds / (double)secondsInMinute;
+            var minutes = (double) durationInSeconds / 60.0;
             if (minutes == 0.0) {
                 return "0m";
             }

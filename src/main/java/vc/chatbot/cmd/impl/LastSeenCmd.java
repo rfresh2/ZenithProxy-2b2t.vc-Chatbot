@@ -6,7 +6,6 @@ import vc.chatbot.api.ApiClients;
 import vc.chatbot.cmd.Cmd;
 import vc.chatbot.openapi.handler.ApiException;
 
-import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -30,11 +29,12 @@ public class LastSeenCmd extends Cmd {
             if (response.getStatusCode() == 204 || response.getData() == null) {
                 return "%s has never been seen on 2b2t".formatted(targetProfile.get().name());
             }
-            var sinceNow = Duration.between(response.getData().getLastSeen(), OffsetDateTime.now());
+            var lastSeen = response.getData().getLastSeen();
+            var now = OffsetDateTime.now();
             return "%s was last seen on %s - %s ago".formatted(
                 targetProfile.get().name(),
-                dateTimeFormatter().format(response.getData().getLastSeen()),
-                formatDuration(sinceNow.toSeconds())
+                dateTimeFormatter().format(lastSeen),
+                formatDuration(lastSeen, now)
             );
         } catch (ApiException e) {
             error("API error", e);
