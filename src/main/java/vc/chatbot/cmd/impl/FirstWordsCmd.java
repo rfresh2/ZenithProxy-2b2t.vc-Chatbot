@@ -23,7 +23,7 @@ public class FirstWordsCmd extends Cmd {
         try {
             var response = ApiClients.INSTANCE.chatsApi().chatsWithHttpInfo(null, targetProfile.get().name(), targetProfile.get().uuid(), null, null, "asc", 1, 0);
             if (response.getStatusCode() == 204 || response.getData() == null || response.getData().getChats().isEmpty()) {
-                return "%s has never said anything";
+                return "%s has never said anything".formatted(targetProfile.get().name());
             }
             var chat = response.getData().getChats().getFirst();
             return "[%s] <%s> %s".formatted(

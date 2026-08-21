@@ -23,7 +23,7 @@ public class FirstDeathCmd extends Cmd {
         try {
             var response = ApiClients.INSTANCE.deathsApi().deathsWithHttpInfo(targetProfile.get().uuid(), targetProfile.get().name(), null, null, "asc", 1, null);
             if (response.getStatusCode() == 204 || response.getData() == null || response.getData().getDeaths().isEmpty()) {
-                return "%s has never died";
+                return "%s has never died".formatted(targetProfile.get().name());
             }
             var firstDeath = response.getData().getDeaths().getFirst();
             return "[%s] %s".formatted(

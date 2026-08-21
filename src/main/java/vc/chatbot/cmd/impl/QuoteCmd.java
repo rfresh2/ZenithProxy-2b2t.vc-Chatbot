@@ -24,7 +24,7 @@ public class QuoteCmd extends Cmd {
         try {
             var response = ApiClients.INSTANCE.chatsApi().chatsWithHttpInfo(null, targetProfile.get().name(), targetProfile.get().uuid(), null, null, "desc", 100, null);
             if (response.getStatusCode() == 204 || response.getData() == null || response.getData().getChats().isEmpty()) {
-                return "%s has never said anything";
+                return "%s has never said anything".formatted(targetProfile.get().name());
             }
             var chat = response.getData().getChats().get(ThreadLocalRandom.current().nextInt(0, response.getData().getChats().size()));
             if (response.getData().getPageCount() > 1) {
