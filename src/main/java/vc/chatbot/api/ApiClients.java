@@ -44,9 +44,12 @@ public class ApiClients {
                     CONFIG.authentication.username,
                     BuildConstants.VERSION
                 ));
+                req.header("X-Request-Time", System.currentTimeMillis() + "");
             })
             .setResponseInterceptor(res -> {
-                ChatbotPlugin.LOG.info("{} -> {}", res.uri().toString(), res.statusCode());
+                var before = res.request().headers().firstValueAsLong("X-Request-Time").orElse(System.currentTimeMillis());
+                var durationMs = System.currentTimeMillis() - before;
+                ChatbotPlugin.LOG.info("{} -> {} ({}ms)", res.uri().toString(), res.statusCode(), durationMs);
             });
     }
 }
