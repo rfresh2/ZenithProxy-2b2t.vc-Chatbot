@@ -16,6 +16,7 @@ How to install ZenithProxy plugins: https://wiki.2b2t.vc/Plugins/
 * `!joindate` / `!join` / `!jd` / `!firstseen`
 * `!firstwords`
 * `!help`
+* `!joins` / `!connections`
 * `!kd` / `!kills` / `!deaths`
 * `!seen` / `!lastseen`
 * `!nolife`

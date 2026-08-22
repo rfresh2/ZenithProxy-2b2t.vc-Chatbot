@@ -18,6 +18,7 @@ public class CmdRegistry {
         new FirstSeenCmd(),
         new FirstWordsCmd(),
         new HelpCmd(),
+        new JoinCountCmd(),
         new KillDeathCmd(),
         new LastSeenCmd(),
         new NoLifeCmd(),
