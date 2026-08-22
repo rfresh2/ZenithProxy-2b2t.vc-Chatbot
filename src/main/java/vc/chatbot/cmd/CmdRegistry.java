@@ -11,6 +11,7 @@ public class CmdRegistry {
 
     private final List<Cmd> cmds = List.of(
         new BotCmd(),
+        new ChatCountCmd(),
         new CoordsCmd(),
         new FirstDeathCmd(),
         new FirstKillCmd(),

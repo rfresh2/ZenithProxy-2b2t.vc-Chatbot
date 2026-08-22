@@ -9,6 +9,7 @@ How to install ZenithProxy plugins: https://wiki.2b2t.vc/Plugins/
 ## Chatbot Commands
 
 * `!bot` / `!bots` / `!botcount`
+* `!chatcount` / `!chats` / `!messages` / `!msgs` 
 * `!coords` / `!locate`
 * `!firstdeath` / `!fd`
 * `!firstkill` / `!fk`
