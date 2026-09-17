@@ -2,7 +2,7 @@ import org.gradle.internal.DefaultTaskExecutionRequest
 import java.lang.Boolean.parseBoolean
 
 plugins {
-    id("zenithproxy.plugin.dev") version "1.0.1-SNAPSHOT"
+    id("zenithproxy.plugin.dev") version "1.2.+"
     id("org.openapi.generator") version "7.24.0"
     id("io.freefair.lombok") version "9.5.0"
 }
@@ -15,14 +15,15 @@ val pluginId = property("plugin_id") as String
 java { toolchain { languageVersion = JavaLanguageVersion.of(25) } }
 
 zenithProxyPlugin {
-    templateProperties = mapOf(
-        // variables in your BuildConstants.java template class
-        "version" to project.version,
-        "mc_version" to mc,
-        "plugin_id" to pluginId,
-        "maven_group" to group as String,
-        "plugin_name" to project.name,
-    )
+    buildConstants {
+        fields = mapOf(
+            "VERSION" to project.version as String,
+            "MC_VERSION" to mc,
+            "PLUGIN_ID" to pluginId,
+            "MAVEN_GROUP" to group as String,
+            "PLUGIN_NAME" to project.name,
+        )
+    }
     // the minimum supported java version for users of your plugin
     javaReleaseVersion = JavaLanguageVersion.of(21)
 }
