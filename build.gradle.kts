@@ -3,8 +3,8 @@ import java.lang.Boolean.parseBoolean
 
 plugins {
     id("zenithproxy.plugin.dev") version "1.2.+"
-    id("org.openapi.generator") version "7.24.0"
-    id("io.freefair.lombok") version "9.5.0"
+    id("org.openapi.generator") version "7.25.0"
+    id("io.freefair.lombok") version "9.7.0"
 }
 
 group = property("maven_group") as String
